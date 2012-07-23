@@ -1,8 +1,8 @@
 /* $Revision$ $Author$ $Date$
  *
- * Copyright (C) 2002-2007  Christoph Steinbeck <steinbeck@users.sf.net>
- *               2011       Syed Asad Rahman <asad@ebi.ac.uk>
- *           
+ * Copyright (C) 2011-2012       Syed Asad Rahman <asad@ebi.ac.uk>
+ *               2002-2007  Christoph Steinbeck <steinbeck@users.sf.net>
+ *
  *
  * Contact: cdk-devel@lists.sourceforge.net
  *
@@ -52,10 +52,13 @@ import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 
 /**
- * Generates a fingerprint for a given AtomContainer. Fingerprints are one-dimensional bit arrays, where bits are set
- * according to a the occurrence of a particular structural feature (See for example the Daylight inc. theory manual for
- * more information). Fingerprints allow for a fast screening step to exclude candidates for a substructure search in a
- * database. They are also a means for determining the similarity of chemical structures. <p>
+ * Generates a fingerprint for a given AtomContainer. 
+ * Fingerprints are one-dimensional bit arrays, where bits are set
+ * according to a the occurrence of a particular structural feature 
+ * (See for example the Daylight inc. theory manual for more information).
+ * Fingerprints allow for a fast screening step to exclude 
+ * candidates for a substructure search in a database. 
+ * They are also a means for determining the similarity of chemical structures. <p>
  *
  * A fingerprint is generated for an AtomContainer with this code:
  * <pre>
@@ -80,9 +83,15 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
  * indicates a pattern is missing then it certainly is, but it can only indicate a pattern's presence with some
  * probability." In the case of very small molecules, the probability that you get the same fingerprint for different
  * molecules is high. </font> </p>
- *
- * @author Syed Asad Rahman (2011-2012), Christoph Steinbeck (2002-2007) @cdk.created 07-11-2011 @cdk.keyword
- * fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
+ */
+/*
+ * @author Syed Asad Rahman (2011-2012), 
+ *         Christoph Steinbeck (2002-2007) 
+ * @cdk.created 07-11-2011 
+ * @cdk.keyword fingerprint 
+ * @cdk.keyword similarity 
+ * @cdk.module standard 
+ * @cdk.githash
  */
 public class HashedSPFingerprinter extends RandomNumber implements IFingerprinter {
 
@@ -98,8 +107,7 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
 
     /**
      * Creates a fingerprint generator of length
-     * <code>DEFAULT_SIZE</code> and with a search depth of
-     * <code>DEFAULT_SEARCH_DEPTH</code>.
+     * <code>DEFAULT_SIZE</code> 
      */
     /**
      * Constructs a fingerprint generator that creates fingerprints of the given fingerprintLength, using a generation

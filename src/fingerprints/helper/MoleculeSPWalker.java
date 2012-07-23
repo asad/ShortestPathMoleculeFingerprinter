@@ -1,6 +1,6 @@
 /* $Revision$ $Author$ $Date$
  *
- * Copyright (C) 2011       Syed Asad Rahman <asad@ebi.ac.uk>
+ * Copyright (C) 2011-2012       Syed Asad Rahman <asad@ebi.ac.uk>
  *           
  *
  * Contact: cdk-devel@lists.sourceforge.net
@@ -25,7 +25,7 @@
  */
 package fingerprints.helper;
 
-import java.io.Serializable;
+import fingerprints.interfaces.IWalker;
 import java.util.*;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.interfaces.IAtom;
@@ -33,7 +33,6 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
-import fingerprints.interfaces.IWalker;
 import graph.algorithm.Dijkstra;
 import graph.model.AtomContainerGraph;
 import graph.model.AtomVertex;
@@ -42,7 +41,7 @@ import graph.model.AtomVertex;
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk> 2011-2012
  */
-public class MoleculeSPWalker implements IWalker, Serializable {
+public class MoleculeSPWalker implements IWalker {
 
     private static final long serialVersionUID = 0x3b728f46;
     private final IAtomContainer atomContainer;
