@@ -23,10 +23,10 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 package graph.algorithm;
 
 import graph.algorithm.helper.Printer;
+import graph.algorithm.helper.VertexCanonicalisation;
 import graph.model.AtomContainerGraph;
 import graph.model.AtomVertex;
 import graph.model.ShortestPathContainer;
@@ -92,7 +92,7 @@ public class Dijkstra extends Printer {
     private ShortestPathContainer findShortestPaths() {
         Map<AtomVertex, Integer> path = new HashMap<AtomVertex, Integer>();
         Map<AtomVertex, AtomVertex> ancestors = new HashMap<AtomVertex, AtomVertex>();
-        Set<AtomVertex> vertices = new HashSet<AtomVertex>();
+        Collection<AtomVertex> vertices = new LinkedList<AtomVertex>();
         initializeCost(graph, source, path, ancestors, vertices);
 
         /*
@@ -102,7 +102,7 @@ public class Dijkstra extends Printer {
             AtomVertex u = findCheapestPath(vertices, path);
             vertices.remove(u);
             for (Iterator<Entry<AtomVertex, Integer>> it =
-                    graph.getAdjacentVertizes(u).entrySet().iterator(); it.hasNext();) {
+                    graph.getAdjacentVertices(u).entrySet().iterator(); it.hasNext();) {
                 Entry<AtomVertex, Integer> v = it.next();
                 if (vertices.contains(v.getKey())) {
                     updateDistance(u, v.getKey(), v.getValue(), path,
@@ -126,7 +126,7 @@ public class Dijkstra extends Printer {
             AtomVertex start,
             Map<AtomVertex, Integer> pathMap,
             Map<AtomVertex, AtomVertex> ancestors,
-            Set<AtomVertex> vertices) {
+            Collection<AtomVertex> vertices) {
         // initialize the matrix with infinity (Integer.MAX_VALUE) cost
         for (AtomVertex v : graph.getVertexSet()) {
             pathMap.put(v, Integer.valueOf(Integer.MAX_VALUE));
@@ -146,7 +146,7 @@ public class Dijkstra extends Printer {
      * @return
      */
     private AtomVertex findCheapestPath(
-            Set<AtomVertex> q,
+            Collection<AtomVertex> q,
             Map<AtomVertex, Integer> path) {
 
         AtomVertex lowest = null;

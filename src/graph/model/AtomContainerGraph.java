@@ -5,8 +5,8 @@
  *
  * Contact: cdk-devel@lists.sourceforge.net
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public License
+ * This program is free software; you can redistribute itAtom and/or
+ * modify itAtom under the terms of the GNU Lesser General Public License
  * as published by the Free Software Foundation; either version 2.1
  * of the License, or (at your option) any later version.
  * All we ask is that proper credit is given for our work, which includes
@@ -14,7 +14,7 @@
  * of your source code files, and to any copyright notice that you may distribute
  * with programs based on this work.
  *
- * This program is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that itAtom will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
@@ -25,6 +25,7 @@
  */
 package graph.model;
 
+import graph.algorithm.helper.VertexCanonicalisation;
 import java.io.Serializable;
 import java.util.*;
 import org.openscience.cdk.interfaces.IAtom;
@@ -61,14 +62,21 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
 
     private void setAtomContainer(IAtomContainer container, boolean weighted) {
         int i = 1;
-        for (IAtom atom : container.atoms()) {
+        /*
+         * Canonicalized vertexs as SP may return only one path out of k-sp Hence this path has to be same for similar
+         * molecules
+         */
+        Collection<IAtom> canonicalizeAtoms = new VertexCanonicalisation().canonicalizeAtoms(container);
+        for (Iterator<IAtom> it = canonicalizeAtoms.iterator(); it.hasNext();) {
+            IAtom atom = it.next();
             AtomVertex atomVertex = new AtomVertex(atom, i);
             i += 1;
             addVertex(atomVertex, true);
         }
 
-        for (IBond bond : container.bonds()) {
 
+        for (Iterator<IBond> itBond = container.bonds().iterator(); itBond.hasNext();) {
+            IBond bond = itBond.next();
             AtomVertex v1 = getVertexLookupMap().get(bond.getAtom(0));
             AtomVertex v2 = getVertexLookupMap().get(bond.getAtom(1));
             if (weighted) {
@@ -78,6 +86,7 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
                 addEdge(v1, new Edge(v2, 1));
                 addEdge(v2, new Edge(v1, 1));
             }
+
         }
     }
 
@@ -86,7 +95,7 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
      * @param atomVertex
      * @param intoMatrix
      */
-    public void addVertex(AtomVertex atomVertex, boolean intoMatrix) {
+    private void addVertex(AtomVertex atomVertex, boolean intoMatrix) {
         atomVertexSet.add(atomVertex);
         getVertexLookupMap().put(atomVertex.getAtom(), atomVertex);
         if (intoMatrix) {
@@ -103,7 +112,7 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
      * @param atomVertex
      * @return
      */
-    public Map<AtomVertex, Integer> getAdjacentVertizes(AtomVertex atomVertex) {
+    public Map<AtomVertex, Integer> getAdjacentVertices(AtomVertex atomVertex) {
         return adjacencyMatrix.getAdjacentVertices(atomVertex);
     }
 
@@ -113,7 +122,7 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
      * @param v
      * @param l
      */
-    public void addEdge(AtomVertex v, Edge... l) {
+    private void addEdge(AtomVertex v, Edge... l) {
         for (Edge e : l) {
             adjacencyMatrix.addEdge(v, e.getSinkVertex(), e.getWeight());
         }
