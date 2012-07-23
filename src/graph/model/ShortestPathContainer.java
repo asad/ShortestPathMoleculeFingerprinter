@@ -61,7 +61,7 @@ public class ShortestPathContainer {
     /**
      * @return the atomContainerGraph
      */
-    public AtomContainerGraph getG() {
+    public AtomContainerGraph getAtomContainerGraph() {
         return atomContainerGraph;
     }
 
