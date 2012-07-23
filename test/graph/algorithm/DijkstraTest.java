@@ -42,12 +42,12 @@ public class DijkstraTest {
      * Test of main method, of class Dijkstra.
      */
     @Test
-    public void testMain() throws Exception {
+    public void testMainCanonicalization1() throws Exception {
         System.out.println("main");
         IAtomContainer atomContainer = new AtomContainer();
         IAtom atom1 = new Atom("C");
-        IAtom atom2 = new Atom("N");
-        IAtom atom3 = new Atom("O");
+        IAtom atom2 = new Atom("O");
+        IAtom atom3 = new Atom("N");
         IAtom atom4 = new Atom("S");
         IAtom atom5 = new Atom("C");
 
@@ -55,6 +55,7 @@ public class DijkstraTest {
         IBond bond2 = new Bond(atom1, atom3, IBond.Order.SINGLE);
         IBond bond3 = new Bond(atom1, atom4, IBond.Order.SINGLE);
         IBond bond4 = new Bond(atom2, atom5, IBond.Order.SINGLE);
+        IBond bond5 = new Bond(atom3, atom5, IBond.Order.SINGLE);
 
         atomContainer.addAtom(atom1);
         atomContainer.addAtom(atom2);
@@ -67,6 +68,45 @@ public class DijkstraTest {
         atomContainer.addBond(bond2);
         atomContainer.addBond(bond3);
         atomContainer.addBond(bond4);
+        atomContainer.addBond(bond5);
+
+        AtomContainerGraph g = new AtomContainerGraph(atomContainer, true);
+        Dijkstra dijkstra = new Dijkstra(g, g.getVertexLookupMap().get(atom1));
+        dijkstra.printShortestPath(dijkstra.getSinkShorestPath(g.getVertexLookupMap().get(atom5)));
+
+    }
+    
+    /**
+     * Test of main method, of class Dijkstra.
+     */
+    @Test
+    public void testMainCanonicalization2() throws Exception {
+        System.out.println("main");
+        IAtomContainer atomContainer = new AtomContainer();
+        IAtom atom1 = new Atom("C");
+        IAtom atom2 = new Atom("N");
+        IAtom atom3 = new Atom("O");
+        IAtom atom4 = new Atom("S");
+        IAtom atom5 = new Atom("C");
+
+        IBond bond1 = new Bond(atom1, atom2, IBond.Order.SINGLE);
+        IBond bond2 = new Bond(atom1, atom3, IBond.Order.SINGLE);
+        IBond bond3 = new Bond(atom1, atom4, IBond.Order.SINGLE);
+        IBond bond4 = new Bond(atom2, atom5, IBond.Order.SINGLE);
+        IBond bond5 = new Bond(atom3, atom5, IBond.Order.SINGLE);
+
+        atomContainer.addAtom(atom1);
+        atomContainer.addAtom(atom2);
+        atomContainer.addAtom(atom3);
+        atomContainer.addAtom(atom4);
+        atomContainer.addAtom(atom5);
+
+
+        atomContainer.addBond(bond1);
+        atomContainer.addBond(bond2);
+        atomContainer.addBond(bond3);
+        atomContainer.addBond(bond4);
+        atomContainer.addBond(bond5);
 
         AtomContainerGraph g = new AtomContainerGraph(atomContainer, true);
         Dijkstra dijkstra = new Dijkstra(g, g.getVertexLookupMap().get(atom1));
