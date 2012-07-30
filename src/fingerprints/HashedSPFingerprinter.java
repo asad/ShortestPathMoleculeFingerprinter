@@ -48,17 +48,17 @@ import fingerprints.helper.MoleculeSPWalker;
 import fingerprints.helper.RandomNumber;
 import fingerprints.interfaces.IFingerprinter;
 import fingerprints.interfaces.IWalker;
+import org.openscience.cdk.fingerprint.BitSetFingerprint;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
+import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 
 /**
- * Generates a fingerprint for a given AtomContainer. 
- * Fingerprints are one-dimensional bit arrays, where bits are set
- * according to a the occurrence of a particular structural feature 
- * (See for example the Daylight inc. theory manual for more information).
- * Fingerprints allow for a fast screening step to exclude 
- * candidates for a substructure search in a database. 
- * They are also a means for determining the similarity of chemical structures. <p>
+ * Generates a fingerprint for a given AtomContainer. Fingerprints are one-dimensional bit arrays, where bits are set
+ * according to a the occurrence of a particular structural feature (See for example the Daylight inc. theory manual for
+ * more information). Fingerprints allow for a fast screening step to exclude candidates for a substructure search in a
+ * database. They are also a means for determining the similarity of chemical structures. <p>
  *
  * A fingerprint is generated for an AtomContainer with this code:
  * <pre>
@@ -85,13 +85,8 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
  * molecules is high. </font> </p>
  */
 /*
- * @author Syed Asad Rahman (2011-2012), 
- *         Christoph Steinbeck (2002-2007) 
- * @cdk.created 07-11-2011 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard 
- * @cdk.githash
+ * @author Syed Asad Rahman (2011-2012), Christoph Steinbeck (2002-2007) @cdk.created 07-11-2011 @cdk.keyword
+ * fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
 public class HashedSPFingerprinter extends RandomNumber implements IFingerprinter {
 
@@ -107,7 +102,7 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
 
     /**
      * Creates a fingerprint generator of length
-     * <code>DEFAULT_SIZE</code> 
+     * <code>DEFAULT_SIZE</code>
      */
     /**
      * Constructs a fingerprint generator that creates fingerprints of the given fingerprintLength, using a generation
@@ -131,8 +126,7 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
      * @exception CDKException if there is a timeout in ring or aromaticity perception
      * @return A {@link BitSet} representing the fingerprint
      */
-    @Override
-    public BitSet getFingerprint(
+    public IBitFingerprint getBitFingerprint(
             IAtomContainer atomContainer,
             AllRingsFinder ringFinder)
             throws CDKException {
@@ -157,7 +151,7 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
         } else {
             addUniquePath(atomContainer, bitSet);
         }
-        return bitSet;
+        return new BitSetFingerprint(bitSet);
     }
 
     private void addUniquePath(IAtomContainer container, BitSet bitSet) {
@@ -176,9 +170,9 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
      * @throws CDKException
      */
     @Override
-    public BitSet getFingerprint(IAtomContainer container)
+    public IBitFingerprint getBitFingerprint(IAtomContainer container)
             throws CDKException {
-        return getFingerprint(container, null);
+        return getBitFingerprint(container, null);
     }
 
     /**
@@ -315,6 +309,11 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
 
     @Override
     public int getSearchDepth() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 }

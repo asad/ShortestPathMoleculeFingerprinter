@@ -74,7 +74,7 @@ public class FPTest {
 
 
             long now = System.currentTimeMillis();
-            BitSet bitset = fp.getFingerprint(mol);
+            BitSet bitset = fp.getBitFingerprint(mol).asBitSet();
             System.out.println(String.format(
                     "Atoms\t%d"
                     + "\tBonds\t%d"

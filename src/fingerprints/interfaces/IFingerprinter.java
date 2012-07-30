@@ -29,14 +29,12 @@ import java.util.BitSet;
 import java.util.Map;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 
 /**
- * @author Syed Asad Rahman (2011-2012) 
- * @cdk.created 07-11-2011
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity
+ * @author Syed Asad Rahman (2011-2012) @cdk.created 07-11-2011 @cdk.keyword fingerprint @cdk.keyword similarity
  * @cdk.module standard
  */
 public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerprinter {
@@ -56,7 +54,7 @@ public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerp
      * @return A {@link BitSet} representing the fingerprint
      */
     @TestMethod(value = "testGetFingerprint_IAtomContainer")
-    BitSet getFingerprint(IAtomContainer container, AllRingsFinder ringFinder) throws CDKException;
+    IBitFingerprint getBitFingerprint(IAtomContainer container, AllRingsFinder ringFinder) throws CDKException;
 
     /**
      * Generates a fingerprint of the default size for the given AtomContainer.
@@ -67,7 +65,7 @@ public interface IFingerprinter extends org.openscience.cdk.fingerprint.IFingerp
      */
     @TestMethod(value = "testGetFingerprint_IAtomContainer")
     @Override
-    BitSet getFingerprint(IAtomContainer container) throws CDKException;
+    IBitFingerprint getBitFingerprint(IAtomContainer container) throws CDKException;
 
     /**
      * {@inheritDoc}
