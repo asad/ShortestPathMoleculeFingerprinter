@@ -33,7 +33,7 @@ public class RingSearchSPTestCases {
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("Naphthalene fp " + fingerprint1.toString());
     }
 
@@ -48,7 +48,7 @@ public class RingSearchSPTestCases {
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("Anthracene fp " + fingerprint1.toString());
     }
 
@@ -64,7 +64,7 @@ public class RingSearchSPTestCases {
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
-        fingerprint1 = fingerprint.getFingerprint(molecule);
+        fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println(" Multiphtalene fp " + fingerprint1.toString());
     }
 
@@ -86,11 +86,11 @@ public class RingSearchSPTestCases {
         for (String key1 : mols.keySet()) {
             IAtomContainer molecule1 = smilesParser.parseSmiles(mols.get(key1));
             AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule1);
-            BitSet fingerprint1 = fingerprint.getFingerprint(molecule1);
+            BitSet fingerprint1 = fingerprint.getBitFingerprint(molecule1).asBitSet();
             for (String key2 : mols.keySet()) {
                 IAtomContainer molecule2 = smilesParser.parseSmiles(mols.get(key2));
                 AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule2);
-                BitSet fingerprint2 = fingerprint.getFingerprint(molecule2);
+                BitSet fingerprint2 = fingerprint.getBitFingerprint(molecule2).asBitSet();
                 int flag = (FingerprinterTool.isSubset(fingerprint1, fingerprint2)) ? 1 : 0;
                 float calculate = Tanimoto.calculate(fingerprint1, fingerprint2) + 0.0f;
                 String format = String.format("%s\t%s\t%f\t%d", key1, key2, calculate, flag);

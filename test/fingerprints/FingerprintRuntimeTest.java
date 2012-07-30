@@ -51,7 +51,7 @@ public class FingerprintRuntimeTest {
 
 
                 long now = System.currentTimeMillis();
-                BitSet bitset = fp.getFingerprint(mol);
+                BitSet bitset = fp.getBitFingerprint(mol).asBitSet();
                 System.out.println(String.format("Atoms\t%d"
                         + "\tBonds\t%d"
                         + "\tFP Depth\t%d"
@@ -96,7 +96,7 @@ public class FingerprintRuntimeTest {
 
 
             long now = System.currentTimeMillis();
-            BitSet bitset = fp.getFingerprint(mol);
+            BitSet bitset = fp.getBitFingerprint(mol).asBitSet();
             System.out.println(String.format(
                     "Atoms\t%d"
                     + "\tBonds\t%d"
