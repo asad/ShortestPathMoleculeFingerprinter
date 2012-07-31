@@ -26,17 +26,22 @@
  */
 package fingerprints;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import fingerprints.helper.MoleculeSPWalker;
+import fingerprints.helper.RandomNumber;
+import fingerprints.interfaces.ISPFingerprinter;
+import fingerprints.interfaces.ISPWalker;
+import java.util.*;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.RingSet;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.fingerprint.BitSetFingerprint;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
+import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.ringsearch.SSSRFinder;
@@ -44,15 +49,6 @@ import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
-import fingerprints.helper.MoleculeSPWalker;
-import fingerprints.helper.RandomNumber;
-import fingerprints.interfaces.IFingerprinter;
-import fingerprints.interfaces.ISPWalker;
-import org.openscience.cdk.fingerprint.BitSetFingerprint;
-import org.openscience.cdk.fingerprint.IBitFingerprint;
-import org.openscience.cdk.fingerprint.ICountFingerprint;
-import org.openscience.cdk.graph.ConnectivityChecker;
-import org.openscience.cdk.interfaces.IAtomContainerSet;
 
 /**
  * Generates a fingerprint for a given AtomContainer. Fingerprints are one-dimensional bit arrays, where bits are set
@@ -88,8 +84,12 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
  * @author Syed Asad Rahman (2011-2012), Christoph Steinbeck (2002-2007) @cdk.created 07-11-2011 @cdk.keyword
  * fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class HashedSPFingerprinter extends RandomNumber implements IFingerprinter {
+public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprinter {
 
+    /**
+     * The default length of created fingerprints.
+     */
+    public final static int DEFAULT_SIZE = 1024;
     /**
      * The default length of created fingerprints.
      */
@@ -104,6 +104,10 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
      * Creates a fingerprint generator of length
      * <code>DEFAULT_SIZE</code>
      */
+    public HashedSPFingerprinter() {
+        this(DEFAULT_SIZE);
+    }
+
     /**
      * Constructs a fingerprint generator that creates fingerprints of the given fingerprintLength, using a generation
      * algorithm with shortest paths.
