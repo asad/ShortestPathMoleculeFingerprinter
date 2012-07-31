@@ -4,7 +4,6 @@
  */
 package fingerprints;
 
-import fingerprints.interfaces.IFingerprinter;
 import java.util.BitSet;
 import junit.framework.Assert;
 import net.sf.jniinchi.INCHI_RET;
