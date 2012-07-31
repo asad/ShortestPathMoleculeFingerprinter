@@ -25,7 +25,7 @@
  */
 package fingerprints.helper;
 
-import fingerprints.interfaces.IWalker;
+import fingerprints.interfaces.ISPWalker;
 import java.util.*;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.interfaces.IAtom;
@@ -41,7 +41,7 @@ import graph.model.AtomVertex;
  *
  * @author Syed Asad Rahman <asad@ebi.ac.uk> 2011-2012
  */
-public class MoleculeSPWalker implements IWalker {
+public class MoleculeSPWalker implements ISPWalker {
 
     private static final long serialVersionUID = 0x3b728f46;
     private final IAtomContainer atomContainer;
@@ -189,7 +189,7 @@ public class MoleculeSPWalker implements IWalker {
                 } else {
                     Integer atnum = PeriodicTable.getAtomicNumber(x.getSymbol());
                     if (atnum != null) {
-                        sb.append(toInSensitiveAtomPattern(x));
+                        sb.append(toAtomPattern(x));
                     } else {
                         sb.append((char) PeriodicTable.getElementCount() + 1);
                     }
@@ -211,7 +211,7 @@ public class MoleculeSPWalker implements IWalker {
                                 });
                     }
                     sb.append(getBondInSensitiveSymbol(b[0]));
-                    sb.append(toInSensitiveAtomPattern(y[0]));
+                    sb.append(toAtomPattern(y[0]));
                     x = y[0];
                 }
 
@@ -230,22 +230,6 @@ public class MoleculeSPWalker implements IWalker {
     }
 
     private String toAtomPattern(IAtom atom) {
-        Double stereoParity = atom.getStereoParity() == null ? 0. : atom.getStereoParity();
-        Integer atomicNumber = atom.getAtomicNumber() == null ? 0 : atom.getAtomicNumber();
-        String atomConfiguration;
-        atomConfiguration = atom.getSymbol()
-                + ":" + stereoParity.toString()
-                + ":" + atomicNumber
-                + ":" + atom.getFlag(CDKConstants.ISINRING);
-
-        if (!patterns.containsKey(atomConfiguration)) {
-            String generatedPattern = generateNewPattern();
-            patterns.put(atomConfiguration, generatedPattern);
-        }
-        return patterns.get(atomConfiguration);
-    }
-
-    private String toInSensitiveAtomPattern(IAtom atom) {
         String atomConfiguration;
         atomConfiguration = atom.getSymbol();
         if (!patterns.containsKey(atomConfiguration)) {
@@ -287,7 +271,9 @@ public class MoleculeSPWalker implements IWalker {
     private String getBondInSensitiveSymbol(IBond bond) {
         String bondSymbol = "";
 
-        if (bond.getOrder() == IBond.Order.SINGLE) {
+        if (bond.getFlag(CDKConstants.ISINRING)) {
+            bondSymbol += "@";
+        } else if (bond.getOrder() == IBond.Order.SINGLE) {
             bondSymbol += "-";
         } else if (bond.getOrder() == IBond.Order.DOUBLE) {
             bondSymbol += "-";

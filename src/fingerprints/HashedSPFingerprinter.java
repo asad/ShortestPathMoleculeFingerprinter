@@ -47,7 +47,7 @@ import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import fingerprints.helper.MoleculeSPWalker;
 import fingerprints.helper.RandomNumber;
 import fingerprints.interfaces.IFingerprinter;
-import fingerprints.interfaces.IWalker;
+import fingerprints.interfaces.ISPWalker;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
@@ -215,7 +215,7 @@ public class HashedSPFingerprinter extends RandomNumber implements IFingerprinte
      */
     protected Integer[] findPaths(IAtomContainer container) {
 
-        IWalker walker = new MoleculeSPWalker(container);
+        ISPWalker walker = new MoleculeSPWalker(container);
         // convert paths to hashes
         List<Integer> paths = new ArrayList<Integer>();
         int patternIndex = 0;

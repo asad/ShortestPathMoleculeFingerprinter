@@ -32,7 +32,7 @@ import java.util.Set;
  *
  * @author Asad
  */
-public interface IWalker extends Serializable {
+public interface ISPWalker extends Serializable {
 
     /**
      * @return the cleanPath
