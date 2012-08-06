@@ -30,7 +30,7 @@ import org.apache.commons.math3.random.RandomAdaptor;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
- * @author Syed Asad Rahman <asad@ebi.ac.uk> 2007-2011
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
 public class RandomNumber {
 

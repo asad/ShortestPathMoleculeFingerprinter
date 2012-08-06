@@ -26,12 +26,20 @@
 package graph.algorithm;
 
 import graph.algorithm.helper.Printer;
-import graph.algorithm.helper.VertexCanonicalisation;
 import graph.model.AtomContainerGraph;
 import graph.model.AtomVertex;
 import graph.model.ShortestPathContainer;
 import java.util.*;
 import java.util.Map.Entry;
+
+/**
+ *
+ * @author Syed Asad Rahman (2012) 
+ * @cdk.keyword fingerprint 
+ * @cdk.keyword similarity 
+ * @cdk.module standard
+ * @cdk.githash
+ */
 
 public class Dijkstra extends Printer {
 

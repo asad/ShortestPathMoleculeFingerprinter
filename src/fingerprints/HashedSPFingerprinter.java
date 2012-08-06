@@ -1,7 +1,6 @@
 /* $Revision$ $Author$ $Date$
  *
  * Copyright (C) 2011-2012       Syed Asad Rahman <asad@ebi.ac.uk>
- *               2002-2007  Christoph Steinbeck <steinbeck@users.sf.net>
  *
  *
  * Contact: cdk-devel@lists.sourceforge.net
@@ -31,58 +30,57 @@ import fingerprints.helper.RandomNumber;
 import fingerprints.interfaces.ISPFingerprinter;
 import fingerprints.interfaces.ISPWalker;
 import java.util.*;
+import java.util.logging.Level;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.openscience.cdk.RingSet;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
+import org.openscience.cdk.fingerprint.Fingerprinter;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
+import org.openscience.cdk.interfaces.IAtomType.Hybridization;
 import org.openscience.cdk.interfaces.IRingSet;
-import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
+import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
- * Generates a fingerprint for a given AtomContainer. Fingerprints are one-dimensional bit arrays, where bits are set
- * according to a the occurrence of a particular structural feature (See for example the Daylight inc. theory manual for
- * more information). Fingerprints allow for a fast screening step to exclude candidates for a substructure search in a
- * database. They are also a means for determining the similarity of chemical structures. <p>
+ * Generates a fingerprint for a given {@link IAtomContainer}. Fingerprints are one-dimensional bit arrays, where bits
+ * are set according to a the occurrence of a particular structural feature (See for example the Daylight inc. theory
+ * manual for more information). Fingerprints allow for a fast screening step to exclude candidates for a substructure
+ * search in a database. They are also a means for determining the similarity of chemical structures.
  *
  * A fingerprint is generated for an AtomContainer with this code:
  * <pre>
  *   AtomContainer molecule = new AtomContainer();
  *   IFingerprinter fingerprinter = new HashedSPFingerprinter();
- *   BitSet fingerprint = fingerprinter.getFingerprint(molecule);
- *   This will match ring system with rings.
+ *   IBitFingerprint fingerprint = fingerprinter.getFingerprint(molecule);
+ *   This will respect rings systems.
  *   fingerprinter.setRespectRingMatches(true);
+ *   This will respect charges
+ *   fingerprinter.setRespectFormalCharges(true);
  *   fingerprint.fingerprintLength(); // returns 1024 by default
  *   fingerprint.length(); // returns the highest set bit
  * </pre> <p>
  *
- * The FingerPrinter assumes that hydrogens are explicitly given!
+ * <p>The FingerPrinter calculates fingerprint based on the Shortest Paths between two atoms. It also takes care of the
+ * ring system and charges, if desired.
  *
- * <font color="#FF0000">Warning: The aromaticity detection for this FingerPrinter relies on AllRingsFinder, which is
- * known to take very long for some molecules with many cycles or special cyclic topologies. Thus, the AllRingsFinder
- * has a built-in timeout of 5 seconds after which it aborts and throws an Exception. If you want your SMILES generated
- * at any expense, you need to create your own AllRingsFinder, set the timeout to a higher value, and assign it to this
- * FingerPrinter. In the vast majority of cases, however, the defaults will be fine. </font> <p>
+ * <p>The FingerPrinter assumes that hydrogens are explicitly given! Furthermore, if pseudo atoms or atoms with
+ * malformed symbols are present, their atomic number is taken as one more than the last element currently supported in {@link PeriodicTable}.
  *
- * <font color="#FF0000">Another Warning : The daylight manual says: "Fingerprints are not so definite: if a fingerprint
- * indicates a pattern is missing then it certainly is, but it can only indicate a pattern's presence with some
- * probability." In the case of very small molecules, the probability that you get the same fingerprint for different
- * molecules is high. </font> </p>
- */
-/*
- * @author Syed Asad Rahman (2011-2012), Christoph Steinbeck (2002-2007) @cdk.created 07-11-2011 @cdk.keyword
- * fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
+ * <p>Unlike the {@link Fingerprinter}, this fingerprinter does not take into account aromaticity. Instead, it takes
+ * into account SP2
+ * {@link Hybridization}.
+ *
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
 public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprinter {
 
@@ -98,7 +96,6 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
     private boolean respectFormalCharges;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(HashedSPFingerprinter.class);
-    private AllRingsFinder arf;
 
     /**
      * Creates a fingerprint generator of length
@@ -118,25 +115,19 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
         this.fingerprintLength = fingerprintLength;
         this.respectRingMatches = false;
         this.respectFormalCharges = false;
-        this.arf = new AllRingsFinder();
     }
 
     /**
      * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
      *
      * @param atomContainer The AtomContainer for which a Fingerprint is generated
-     * @param ringFinder An instance of
-     *                   {@link org.openscience.cdk.ringsearch.AllRingsFinder}
      * @exception CDKException if there is a timeout in ring or aromaticity perception
      * @return A {@link BitSet} representing the fingerprint
      */
+    @Override
     public IBitFingerprint getBitFingerprint(
-            IAtomContainer atomContainer,
-            AllRingsFinder ringFinder)
+            IAtomContainer atomContainer)
             throws CDKException {
-        if (ringFinder != null) {
-            this.arf = ringFinder;
-        }
         logger.debug("Entering Fingerprinter");
         logger.debug("Starting Aromaticity Detection");
         long before = System.currentTimeMillis();
@@ -159,24 +150,17 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
     }
 
     private void addUniquePath(IAtomContainer container, BitSet bitSet) {
-        Integer[] hashes = findPaths(container);
-        for (Integer hash : hashes) {
-            int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
-            bitSet.set(position);
+        try {
+            Integer[] hashes = findPaths(container);
+            for (Integer hash : hashes) {
+                int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
+                bitSet.set(position);
+            }
+        } catch (CloneNotSupportedException ex) {
+            logger.error(Level.SEVERE, null, ex);
+        } catch (CDKException ex) {
+            logger.error(Level.SEVERE, null, ex);
         }
-    }
-
-    /**
-     * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
-     *
-     * @param container The AtomContainer for which a Fingerprint is generated
-     * @return
-     * @throws CDKException
-     */
-    @Override
-    public IBitFingerprint getBitFingerprint(IAtomContainer container)
-            throws CDKException {
-        return getBitFingerprint(container, null);
     }
 
     /**
@@ -201,10 +185,17 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
     }
 
     private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
-        Integer[] hashes = findPaths(atomContainer);
-        for (Integer hash : hashes) {
-            int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
-            uniquePaths.put(new Integer(position).toString(), hash);
+        Integer[] hashes;
+        try {
+            hashes = findPaths(atomContainer);
+            for (Integer hash : hashes) {
+                int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
+                uniquePaths.put(new Integer(position).toString(), hash);
+            }
+        } catch (CloneNotSupportedException ex) {
+            logger.error(Level.SEVERE, null, ex);
+        } catch (CDKException ex) {
+            logger.error(Level.SEVERE, null, ex);
         }
     }
 
@@ -216,8 +207,10 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
      *
      * @param container The molecule to search
      * @return A map of path strings, keyed on themselves
+     * @throws CloneNotSupportedException
+     * @throws CDKException
      */
-    protected Integer[] findPaths(IAtomContainer container) {
+    protected Integer[] findPaths(IAtomContainer container) throws CloneNotSupportedException, CDKException {
 
         ISPWalker walker = new MoleculeSPWalker(container);
         // convert paths to hashes
@@ -230,30 +223,14 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
         }
 
         if (isRespectRingMatches()) {
-            IRingSet rings = new RingSet();
-            IRingSet allRings;
-            try {
-                allRings = arf.findAllRings(container);
-                rings.add(allRings);
-            } catch (CDKException e) {
-                logger.debug(e.toString());
-            }
-
-            // sets SSSR information
             SSSRFinder finder = new SSSRFinder(container);
             IRingSet sssr = finder.findEssentialRings();
-            rings.add(sssr);
-            RingSetManipulator.markAromaticRings(rings);
-            RingSetManipulator.sort(rings);
-            int ringSize = 0;
-            for (IAtomContainer ring : rings.atomContainers()) {
-                int atomCount = ring.getAtomCount();
-                if (ringSize < atomCount) {
-                    int toHashCode = new HashCodeBuilder(17, 37).append(atomCount).toHashCode();
-                    paths.add(patternIndex, toHashCode);
-                    patternIndex++;
-                    ringSize++;
-                }
+            RingSetManipulator.sort(sssr);
+            for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
+                IAtomContainer ring = it.next();
+                int toHashCode = new HashCodeBuilder(17, 37).append(ring.getAtomCount()).toHashCode();
+                paths.add(patternIndex, toHashCode);
+                patternIndex++;
             }
         }
 
@@ -300,6 +277,7 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
     /**
      * @return the respectFormalCharges
      */
+    @Override
     public boolean isRespectFormalCharges() {
         return respectFormalCharges;
     }
@@ -307,6 +285,7 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
     /**
      * @param respectFormalCharges the flag to set if formal charge is checked
      */
+    @Override
     public void setRespectFormalCharges(boolean respectFormalCharges) {
         this.respectFormalCharges = respectFormalCharges;
     }

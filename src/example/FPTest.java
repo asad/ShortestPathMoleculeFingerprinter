@@ -35,17 +35,19 @@ import org.openscience.cdk.inchi.InChIToStructure;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.silent.SilentChemObjectBuilder;
 
-/*
- * To change this template, choose Tools | Templates and open the template in the editor.
- */
 /**
  *
- * @author Asad
+ * @author Syed Asad Rahman (2012) 
+ * @cdk.keyword fingerprint 
+ * @cdk.keyword similarity 
+ * @cdk.module standard
+ * @cdk.githash
  */
 public class FPTest {
 
     /**
      * @param args the command line arguments
+     * @throws CDKException  
      */
     public static void main(String[] args) throws CDKException {
         int n = 7; //don't run with n > 6, unless on a supercomputer
