@@ -88,7 +88,7 @@ public class BFSKSP {
      * @param goalNode
      * @return
      */
-    public Collection<List<AtomVertex>> getKShortestPaths(AtomVertex goalNode) {
+    public Collection<List<AtomVertex>> getSinkKShorestPath(AtomVertex goalNode) {
 
         this.depth = 0;
         this.firstPath = false;
@@ -166,7 +166,7 @@ public class BFSKSP {
 
         AtomContainerGraph g = new AtomContainerGraph(atomContainer, true);
         BFSKSP bfsksP = new BFSKSP(g, g.getVertexLookupMap().get(atom1));
-        Collection<List<AtomVertex>> kShortestPaths = bfsksP.getKShortestPaths(g.getVertexLookupMap().get(atom5));
+        Collection<List<AtomVertex>> kShortestPaths = bfsksP.getSinkKShorestPath(g.getVertexLookupMap().get(atom5));
 
         for (List<AtomVertex> path : kShortestPaths) {
             System.out.println(path);
