@@ -88,7 +88,7 @@ class Vertex implements
     }
 }
 
-public class AtomVertex extends Vertex {
+public final class AtomVertex extends Vertex {
 
     private static final long serialVersionUID = 136767675678688282L;
     private IAtom atom;

@@ -58,7 +58,7 @@ public class Dijkstra extends Printer {
         this.graph = graph;
         this.source = start;
         long startTime = System.currentTimeMillis();
-        shortestPaths = findShortestPaths();
+        this.shortestPaths = findShortestPaths();
         long endTime = System.currentTimeMillis();
         this.computingTime = endTime - startTime;
     }
