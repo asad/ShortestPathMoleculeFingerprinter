@@ -126,7 +126,7 @@ public class BFSSP {
                 closedList.add(currentPath);
                 //                System.out.println("\nCurrent: " + currentPath.getNode());
                 // add neighbors to the open list
-                Set<AtomVertex> container = new TreeSet<AtomVertex>(graph.getAdjacentVertices(currentPath.getNode()).keySet());
+                Set<AtomVertex> container = graph.getAdjacentVertices(currentPath.getNode()).keySet();
                 Iterator<AtomVertex> i = container.iterator();
 //                System.out.println("NeighborPath:");
                 while (i.hasNext()) {
