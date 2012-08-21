@@ -23,37 +23,29 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.model;
+package graph.atom.model;
 
 import java.io.Serializable;
 import org.openscience.cdk.interfaces.IAtom;
 
 /**
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
 class Vertex implements
         Cloneable, Serializable, Comparable<AtomVertex> {
-
+    
     private static final long serialVersionUID = 786786786110723560L;
-    private int vertexId;
-
-    public Vertex() {
-        super();
-    }
-
-    public void setVertexId(int vertexId) {
+    private final int vertexId;
+    
+    public Vertex(int vertexId) {
         this.vertexId = vertexId;
     }
-
+    
     public int getVertexId() {
         return vertexId;
     }
-
+    
     @Override
     public int compareTo(AtomVertex t) {
         if (this.getVertexId() > t.getVertexId()) {
@@ -64,7 +56,7 @@ class Vertex implements
             return 0;
         }
     }
-
+    
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -79,7 +71,7 @@ class Vertex implements
         }
         return true;
     }
-
+    
     @Override
     public int hashCode() {
         int hash = 5;
@@ -89,43 +81,37 @@ class Vertex implements
 }
 
 public final class AtomVertex extends Vertex {
-
+    
     private static final long serialVersionUID = 136767675678688282L;
     private IAtom atom;
-
-    public AtomVertex() {
-    }
-
+    
     @Override
     public int compareTo(AtomVertex o) {
-        return this.getAtom().getSymbol().compareTo(o.getAtom().getSymbol());
+        if (this.atom == o.getAtom()) {
+            return 0;
+        }
+        return super.compareTo(o);
     }
-
-    public AtomVertex(IAtom name) {
-        super();
-        this.setAtom(name);
-    }
-
+    
     public AtomVertex(IAtom name, int id) {
-        super();
+        super(id);
         this.setAtom(name);
-        this.setVertexId(id);
     }
-
+    
     @Override
     public AtomVertex clone() {
         return new AtomVertex(this.getAtom(), getVertexId());
     }
-
+    
     @Override
     public String toString() {
         return "Vertex {" + getAtom().getSymbol() + ", " + getVertexId() + "}";
     }
-
+    
     public void setAtom(IAtom name) {
         this.atom = name;
     }
-
+    
     public IAtom getAtom() {
         return atom;
     }

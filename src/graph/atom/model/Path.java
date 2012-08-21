@@ -23,9 +23,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.model;
+package graph.atom.model;
 
-import graph.model.AtomVertex;
+import graph.atom.model.AtomVertex;
 import java.io.Serializable;
 
 /**
@@ -48,18 +48,7 @@ public class Path implements Cloneable, Serializable, Comparable<Path> {
         if (this.currentNode != other.getNode() && (this.currentNode == null || !this.currentNode.equals(other.getNode()))) {
             return false;
         }
-        if (this.pathParent != other.getParent() && (this.pathParent == null || !this.pathParent.equals(other.getParent()))) {
-            return false;
-        }
         return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = 5;
-        hash = 43 * hash + (this.currentNode != null ? this.currentNode.hashCode() : 0);
-        hash = 43 * hash + (this.pathParent != null ? this.pathParent.hashCode() : 0);
-        return hash;
     }
 
     public AtomVertex getNode() {
@@ -87,20 +76,20 @@ public class Path implements Cloneable, Serializable, Comparable<Path> {
     }
 
     @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 53 * hash + (this.currentNode != null ? this.currentNode.hashCode() : 0);
+        return hash;
+    }
+
+    @Override
     public int compareTo(Path t) {
-        if (this.pathParent.getNode() == null || t.getParent().getNode() == null) {
-            return 10 * this.currentNode.compareTo(t.getNode());
-        } else if (this.currentNode.compareTo(t.getNode()) == 0
-                && this.pathParent.getNode().compareTo(t.getParent().getNode()) == 0) {
-            return 0;
-        } else if (this.currentNode.compareTo(t.getNode()) == 0
-                && this.pathParent.getNode().compareTo(t.getParent().getNode()) != 0) {
-            return this.pathParent.getNode().compareTo(t.getParent().getNode());
-        } else if (this.currentNode.compareTo(t.getNode()) != 0
-                && this.pathParent.getNode().compareTo(t.getParent().getNode()) == 0) {
-            return this.currentNode.compareTo(t.getNode());
-        } else {
-            return 100;
+        if (this.currentNode == null || this.getNode() == null) {
+            return 1;
         }
+        if (this.equals(t)) {
+            return 0;
+        }
+        return -1;
     }
 }

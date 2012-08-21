@@ -23,14 +23,12 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.model;
+package graph;
 
-import org.openscience.cdk.Atom;
-import org.openscience.cdk.AtomContainer;
-import org.openscience.cdk.Bond;
-import org.openscience.cdk.interfaces.IAtom;
-import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IBond;
+import graph.atom.model.AtomVertex;
+import graph.atom.model.ShortestPathContainer;
+import java.util.Map;
+import java.util.Stack;
 
 /**
  *
@@ -40,34 +38,31 @@ import org.openscience.cdk.interfaces.IBond;
  * @cdk.module standard
  * @cdk.githash
  */
-class ExampleGraphContainers {
+public class Printer {
 
-    public ExampleGraphContainers() {
+    /**
+     *
+     * @param pathContainer
+     * @param withCosts
+     */
+    public void printShortestPaths(ShortestPathContainer pathContainer, boolean withCosts) {
+        for (Map.Entry<AtomVertex, AtomVertex> entry : pathContainer.getAncestors().entrySet()) {
+            if (withCosts) {
+                System.out.println("sink " + entry.getKey().toString() + " cost: "
+                        + pathContainer.getPath().get(entry.getKey()));
+            } else {
+                System.out.println("\t" + entry.getKey());
+            }
+        }
     }
 
-    protected void generateExampleGraphContainer() {
-        IAtomContainer atomContainer = new AtomContainer();
-        IAtom atom1 = new Atom("C");
-        IAtom atom2 = new Atom("N");
-        IAtom atom3 = new Atom("O");
-        IAtom atom4 = new Atom("S");
-        IAtom atom5 = new Atom("C");
-
-        IBond bond1 = new Bond(atom1, atom2, IBond.Order.SINGLE);
-        IBond bond2 = new Bond(atom1, atom3, IBond.Order.SINGLE);
-        IBond bond3 = new Bond(atom1, atom4, IBond.Order.SINGLE);
-        IBond bond4 = new Bond(atom2, atom5, IBond.Order.SINGLE);
-
-        atomContainer.addAtom(atom1);
-        atomContainer.addAtom(atom2);
-        atomContainer.addAtom(atom3);
-        atomContainer.addAtom(atom4);
-        atomContainer.addAtom(atom5);
-
-
-        atomContainer.addBond(bond1);
-        atomContainer.addBond(bond2);
-        atomContainer.addBond(bond3);
-        atomContainer.addBond(bond4);
+    /**
+     *
+     * @param pathStack
+     */
+    public void printShortestPath(Stack<AtomVertex> pathStack) {
+        while (!pathStack.isEmpty()) {
+            System.out.println("\t" + pathStack.pop());
+        }
     }
 }

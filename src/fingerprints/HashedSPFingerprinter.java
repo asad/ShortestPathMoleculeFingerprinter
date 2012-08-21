@@ -29,9 +29,9 @@ import fingerprints.helper.MoleculeSPWalker;
 import fingerprints.helper.RandomNumber;
 import fingerprints.interfaces.ISPFingerprinter;
 import fingerprints.interfaces.ISPWalker;
+import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
@@ -39,11 +39,8 @@ import org.openscience.cdk.fingerprint.Fingerprinter;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.graph.ConnectivityChecker;
-import org.openscience.cdk.interfaces.IAtom;
-import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IAtomContainerSet;
+import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.interfaces.IAtomType.Hybridization;
-import org.openscience.cdk.interfaces.IRingSet;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
@@ -82,18 +79,20 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *
  * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprinter {
+public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprinter, Serializable {
 
     /**
      * The default length of created fingerprints.
      */
     public final static int DEFAULT_SIZE = 1024;
+    private static final long serialVersionUID = 7867864332244557861L;
     /**
      * The default length of created fingerprints.
      */
     private int fingerprintLength;
     private boolean respectRingMatches;
     private boolean respectFormalCharges;
+    private boolean respectStereoAssignments;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(HashedSPFingerprinter.class);
 
@@ -115,6 +114,7 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
         this.fingerprintLength = fingerprintLength;
         this.respectRingMatches = false;
         this.respectFormalCharges = false;
+        this.respectStereoAssignments = false;
     }
 
     /**
@@ -217,7 +217,7 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
         List<Integer> paths = new ArrayList<Integer>();
         int patternIndex = 0;
         for (String s : walker.getPaths()) {
-            int toHashCode = new HashCodeBuilder(17, 37).append(s).toHashCode();
+            int toHashCode = s.hashCode();
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
@@ -228,23 +228,52 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
             RingSetManipulator.sort(sssr);
             for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
                 IAtomContainer ring = it.next();
-                int toHashCode = new HashCodeBuilder(17, 37).append(ring.getAtomCount()).toHashCode();
+                int toHashCode = String.valueOf(ring.getAtomCount()).hashCode();
                 paths.add(patternIndex, toHashCode);
                 patternIndex++;
             }
         }
 
         if (isRespectFormalCharges()) {
-            for (IAtom atom : container.atoms()) {
+            List<String> l = new ArrayList<String>();
+            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+                IAtom atom = it.next();
                 int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
                 if (charge != 0) {
-                    String formalChargePattern = String.valueOf(charge);
-                    int toHashCode = new HashCodeBuilder(17, 37).append(formalChargePattern).toHashCode();
-                    paths.add(patternIndex, toHashCode);
-                    patternIndex++;
+                    l.add(atom.getSymbol().concat(String.valueOf(charge)));
                 }
             }
+            Collections.sort(l);
+            int toHashCode = l.hashCode();
+            paths.add(patternIndex, toHashCode);
+            patternIndex++;
         }
+
+        if (isRespectStereoAssignments()) {
+            List<String> l = new ArrayList<String>();
+            /*
+             * atom stereo parity
+             */
+            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+                IAtom atom = it.next();
+                int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity().intValue();
+                if (st != 0) {
+                    l.add(atom.getSymbol().concat(String.valueOf(st)));
+                }
+            }
+            Collections.sort(l);
+            int toHashCode = l.hashCode();
+            paths.add(patternIndex, toHashCode);
+            patternIndex++;
+        }
+
+        StringBuilder stereoInformation = new StringBuilder();
+        stereoInformation.append("RAD: ".concat(String.valueOf(container.getSingleElectronCount())));
+        stereoInformation.append("LP: ".concat(String.valueOf(container.getLonePairCount())));
+        int totalHydrogenCount = AtomContainerManipulator.getTotalHydrogenCount(container);
+        stereoInformation.append("H: ".concat(String.valueOf(totalHydrogenCount)));
+        paths.add(patternIndex, stereoInformation.toString().hashCode());
+        patternIndex++;
 
         return paths.toArray(new Integer[paths.size()]);
     }
@@ -298,5 +327,19 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
     @Override
     public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    /**
+     * @return the respectStereoAssignments
+     */
+    public boolean isRespectStereoAssignments() {
+        return respectStereoAssignments;
+    }
+
+    /**
+     * @param respectStereoAssignments the respectStereoAssignments to set
+     */
+    public void setRespectStereoAssignments(boolean respectStereoAssignments) {
+        this.respectStereoAssignments = respectStereoAssignments;
     }
 }

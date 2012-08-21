@@ -23,35 +23,19 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.algorithm.helper;
+package graph;
 
-import graph.model.AtomVertex;
+import graph.atom.model.AtomVertex;
 import java.util.*;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IChemObject;
 
 /**
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
 public class VertexCanonicalisation {
-
-    public VertexCanonicalisation() {
-    }
-
-    /**
-     * @param inputVertexSet the input Vertex Set
-     * @return canonicalized VertexList
-     */
-    public Collection<AtomVertex> canonicalizeAtomVertex(Collection<AtomVertex> inputVertexSet) {
-        List<AtomVertex> canonicalizedVertexList = new LinkedList<AtomVertex>(inputVertexSet);
-        Collections.sort(canonicalizedVertexList, new VertexComparator());
-        return Collections.synchronizedCollection(canonicalizedVertexList);
-    }
 
     /**
      * @param atomSet the atomSet to set
@@ -79,29 +63,17 @@ public class VertexCanonicalisation {
         Collections.sort(canonicalizedVertexList, new AtomComparator());
         return Collections.synchronizedCollection(canonicalizedVertexList);
     }
-}
 
-class VertexComparator implements Comparator<AtomVertex> {
-
-    @Override
-    public int compare(AtomVertex o1, AtomVertex o2) {
-        if (!(o1 instanceof AtomVertex) || !(o2 instanceof AtomVertex)) {
-            throw new ClassCastException();
+    public Collection<IAtomContainer> canonicalizeAtomContainer(Collection<IAtomContainer> containers) {
+        List<IAtomContainer> canonicalizedVertexList = new LinkedList<IAtomContainer>();
+        int i = 0;
+        for (Iterator<IAtomContainer> it = containers.iterator(); it.hasNext();) {
+            IAtomContainer atom = it.next();
+            canonicalizedVertexList.add(i, atom);
+            i++;
         }
-
-        if (o1.getAtom().getSymbol().compareToIgnoreCase(o2.getAtom().getSymbol()) == 0) {
-            if ((o1.getAtom().getHybridization() != null
-                    && o2.getAtom().getHybridization() != null)) {
-                return o1.getAtom().getHybridization().compareTo(o2.getAtom().getHybridization());
-            }
-            return 0;
-        } else {
-            if ((o1.getAtom().getHybridization() != null
-                    && o2.getAtom().getHybridization() != null)) {
-                return 10 * o1.getAtom().getHybridization().compareTo(o2.getAtom().getHybridization());
-            }
-        }
-        return -100;
+        Collections.sort(canonicalizedVertexList, new AtomContainerComparator());
+        return Collections.synchronizedCollection(canonicalizedVertexList);
     }
 }
 
@@ -109,21 +81,42 @@ class AtomComparator implements Comparator<IAtom> {
 
     @Override
     public int compare(IAtom o1, IAtom o2) {
-        if (!(o1 instanceof IAtom) || !(o2 instanceof IAtom)) {
+        if (!(o1 instanceof IChemObject) || !(o2 instanceof IChemObject)) {
             throw new ClassCastException();
         }
         if (o1.getSymbol().compareToIgnoreCase(o2.getSymbol()) == 0) {
-            if ((o1.getHybridization() != null
-                    && o2.getHybridization() != null)) {
+            if (o1.getHybridization() != null && o2.getHybridization() != null) {
                 return o1.getHybridization().compareTo(o2.getHybridization());
             }
             return 0;
-        } else {
-            if ((o1.getHybridization() != null
-                    && o2.getHybridization() != null)) {
-                return 100 * o1.getHybridization().compareTo(o2.getHybridization());
-            }
-            return 10 * o1.getSymbol().compareToIgnoreCase(o2.getSymbol());
         }
+        return 10 * o1.getSymbol().compareToIgnoreCase(o2.getSymbol());
+    }
+}
+
+class AtomContainerComparator implements Comparator<IAtomContainer> {
+
+    @Override
+    public int compare(IAtomContainer o1, IAtomContainer o2) {
+        if (!(o1 instanceof IAtomContainer) || !(o2 instanceof IAtomContainer)) {
+            throw new ClassCastException();
+        }
+        List<String> mol1String = new ArrayList<String>();
+        List<String> mol2String = new ArrayList<String>();
+
+        for (IAtom atom : o1.atoms()) {
+            mol1String.add(atom.getSymbol());
+        }
+
+        for (IAtom atom : o2.atoms()) {
+            mol2String.add(atom.getSymbol());
+        }
+
+        Collections.sort(mol1String);
+        Collections.sort(mol2String);
+        String[] toArray1 = mol1String.toArray(new String[mol1String.size()]);
+        String[] toArray2 = mol2String.toArray(new String[mol2String.size()]);
+
+        return toArray1.toString().compareTo(toArray2.toString());
     }
 }

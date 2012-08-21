@@ -25,6 +25,7 @@
  */
 package fingerprints.helper;
 
+import java.io.Serializable;
 import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.commons.math3.random.RandomAdaptor;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -32,7 +33,8 @@ import org.apache.commons.math3.random.RandomGenerator;
 /**
  * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class RandomNumber {
+public class RandomNumber implements Serializable{
+    private static final long serialVersionUID = 23345464573453571L;
 
     /**
      * Mersenne Twister Random Number for a hashcode within a range between 0 to maximum

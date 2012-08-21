@@ -23,31 +23,31 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.model;
+package graph.atom.model;
 
-import graph.algorithm.helper.VertexCanonicalisation;
+import graph.VertexCanonicalisation;
 import java.io.Serializable;
 import java.util.*;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 
 /**
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class AtomContainerGraph extends ExampleGraphContainers implements Serializable {
+public class AtomGraph extends ExampleGraphContainers implements Serializable {
 
+    private static ILoggingTool logger =
+            LoggingToolFactory.createLoggingTool(AtomGraph.class);
     private static final long serialVersionUID = 88898677862424221L;
     private Set<AtomVertex> atomVertexSet;
-    private AdjacencyMatrix adjacencyMatrix;
+    private AdjacencyAtomMatrix adjacencyMatrix;
     private Map<IAtom, AtomVertex> vertexLookupMap;
 
-    public AtomContainerGraph() {
+    public AtomGraph() {
         this.atomVertexSet = new HashSet<AtomVertex>();
         this.vertexLookupMap = new HashMap<IAtom, AtomVertex>();
     }
@@ -58,9 +58,9 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
      * @param container
      * @param weighted
      */
-    public AtomContainerGraph(IAtomContainer container, boolean weighted) {
+    public AtomGraph(IAtomContainer container, boolean weighted) {
         this();
-        adjacencyMatrix = new AdjacencyMatrix(container.getAtomCount());
+        adjacencyMatrix = new AdjacencyAtomMatrix(container.getAtomCount());
         setAtomContainer(container, weighted);
     }
 
@@ -74,8 +74,8 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
         for (Iterator<IAtom> it = canonicalizeAtoms.iterator(); it.hasNext();) {
             IAtom atom = it.next();
             AtomVertex atomVertex = new AtomVertex(atom, i);
-            i += 1;
             addVertex(atomVertex, true);
+            i += 1;
         }
 
 
@@ -84,13 +84,16 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
             AtomVertex v1 = getVertexLookupMap().get(bond.getAtom(0));
             AtomVertex v2 = getVertexLookupMap().get(bond.getAtom(1));
             if (weighted) {
-                addEdge(v1, new Edge(v2, (bond.getOrder().ordinal() + 1)));
-                addEdge(v2, new Edge(v1, (bond.getOrder().ordinal() + 1)));
-            } else {
-                addEdge(v1, new Edge(v2, 1));
-                addEdge(v2, new Edge(v1, 1));
-            }
 
+                addEdge(v1, new AtomEdge(v2, (bond.getOrder().ordinal() + 1)));
+                addEdge(v2, new AtomEdge(v1, (bond.getOrder().ordinal() + 1)));
+
+            } else {
+
+                addEdge(v1, new AtomEdge(v2, 1));
+                addEdge(v2, new AtomEdge(v1, 1));
+
+            }
         }
     }
 
@@ -117,6 +120,7 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
      * @return
      */
     public Map<AtomVertex, Integer> getAdjacentVertices(AtomVertex atomVertex) {
+        //System.out.println("S: "+ atomVertex + ", N: " + adjacencyMatrix.getAdjacentVertices(atomVertex).keySet());
         return adjacencyMatrix.getAdjacentVertices(atomVertex);
     }
 
@@ -126,8 +130,8 @@ public class AtomContainerGraph extends ExampleGraphContainers implements Serial
      * @param v
      * @param l
      */
-    private void addEdge(AtomVertex v, Edge... l) {
-        for (Edge e : l) {
+    private void addEdge(AtomVertex v, AtomEdge... l) {
+        for (AtomEdge e : l) {
             adjacencyMatrix.addEdge(v, e.getSinkVertex(), e.getWeight());
         }
     }

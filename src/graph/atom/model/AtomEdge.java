@@ -24,7 +24,7 @@
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-package graph.model;
+package graph.atom.model;
 /**
  *
  * @author Syed Asad Rahman (2012) 
@@ -33,20 +33,20 @@ package graph.model;
  * @cdk.module standard
  * @cdk.githash
  */
-public class Edge {
+public class AtomEdge {
 
     private AtomVertex toVertex;
     private int weight;
 
-    public Edge() {
+    public AtomEdge() {
     }
 
-    public Edge(AtomVertex sinkVertex) {
+    public AtomEdge(AtomVertex sinkVertex) {
         super();
         this.toVertex = sinkVertex;
     }
 
-    public Edge(AtomVertex to, int weight) {
+    public AtomEdge(AtomVertex to, int weight) {
         super();
         this.toVertex = to;
         this.weight = weight;
@@ -78,7 +78,7 @@ public class Edge {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        Edge other = (Edge) obj;
+        AtomEdge other = (AtomEdge) obj;
         if (getSinkVertex() == null) {
             if (other.getSinkVertex() != null) {
                 return false;

@@ -23,16 +23,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.algorithm;
+package graph.atom.algorithm;
 
-import graph.model.AtomContainerGraph;
-import graph.model.AtomVertex;
-import graph.model.Path;
+import graph.atom.model.AtomGraph;
+import graph.atom.model.AtomVertex;
+import graph.atom.model.Path;
 import java.util.*;
 import org.openscience.cdk.Atom;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.Bond;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
@@ -45,17 +46,17 @@ import org.openscience.cdk.tools.LoggingToolFactory;
  *
  * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class BFSKSP {
+public class BFSSP {
 
     private static ILoggingTool logger =
-            LoggingToolFactory.createLoggingTool(BFSKSP.class);
-    private final AtomContainerGraph graph;
+            LoggingToolFactory.createLoggingTool(BFSSP.class);
+    private final AtomGraph graph;
     private final AtomVertex startNode;
     private int depth;
     private boolean firstPath;
     private boolean allPath;
 
-    public BFSKSP(AtomContainerGraph graph, AtomVertex startNode) {
+    public BFSSP(AtomGraph graph, AtomVertex startNode) {
         this.graph = graph;
         this.startNode = startNode;
     }
@@ -63,16 +64,21 @@ public class BFSKSP {
     /*
      * recursive call to build the path
      */
-    protected List<AtomVertex> constructPath(Path node) {
-        LinkedList<AtomVertex> path = new LinkedList<AtomVertex>();
+    protected Stack<AtomVertex> constructPath(Path node) {
+        Stack<AtomVertex> path = new Stack<AtomVertex>();
         int localDepth = 1;
         while (node.getParent() != null) {
-            path.addFirst(node.getNode());
+            path.push(node.getNode());
             node = node.getParent();
             localDepth++;
         }
-        path.addFirst(startNode);
-
+        path.push(startNode);
+        /*
+         * Do not report path longer than first shortest path
+         */
+        if (firstPath && localDepth != depth) {
+            return new Stack<AtomVertex>();
+        }
         if (!firstPath) {
             this.firstPath = true;
             this.depth = localDepth;
@@ -88,13 +94,13 @@ public class BFSKSP {
      * @param goalNode
      * @return
      */
-    public Collection<List<AtomVertex>> getSinkKShorestPath(AtomVertex goalNode) {
+    public Collection<Stack<AtomVertex>> getSinkKShorestPath(AtomVertex goalNode) {
 
         this.depth = 0;
         this.firstPath = false;
         this.allPath = false;
 
-        List<List<AtomVertex>> paths = new ArrayList<List<AtomVertex>>();
+        List<Stack<AtomVertex>> paths = new ArrayList<Stack<AtomVertex>>();
         // list of visited nodes
         LinkedList<Path> closedList = new LinkedList<Path>();
         // list of nodes to visit (sorted)
@@ -102,29 +108,33 @@ public class BFSKSP {
         openList.add(new Path(startNode));
         while (!openList.isEmpty()) {
             Path currentPath = openList.removeFirst();
-            logger.debug("\nVisiting " + currentPath.getNode().getAtom().getSymbol());
+            //System.out.println("\nVisiting " + currentPath.getNode().getAtom().getSymbol());
 
             if (currentPath.getNode() == goalNode) {
                 logger.debug("Path found");
                 //Has covered all shortest path at the given depth
                 if (!allPath) {
                     // path found!
-                    List<AtomVertex> constructedPath = constructPath(currentPath);
-                    paths.add(constructedPath);
+                    Stack<AtomVertex> constructedPath = constructPath(currentPath);
+                    if (!constructedPath.isEmpty()) {
+                        paths.add(constructedPath);
+                    }
                     logger.debug("New Path found " + constructedPath);
+                    logger.debug("Depth " + this.depth);
                 }
             } else {
                 closedList.add(currentPath);
+                //                System.out.println("\nCurrent: " + currentPath.getNode());
                 // add neighbors to the open list
-                Iterator<AtomVertex> i = graph.getAdjacentVertices(currentPath.getNode()).keySet().iterator();
-                logger.debug("added  neighborPath:");
+                Set<AtomVertex> container = new TreeSet<AtomVertex>(graph.getAdjacentVertices(currentPath.getNode()).keySet());
+                Iterator<AtomVertex> i = container.iterator();
+//                System.out.println("NeighborPath:");
                 while (i.hasNext()) {
                     AtomVertex neighborNode = i.next();
                     Path neighborPath = new Path(neighborNode);
-                    if (!closedList.contains(neighborPath)
-                            && !openList.contains(neighborPath)) {
+                    if (!closedList.contains(neighborPath) && !openList.contains(neighborPath)) {
                         neighborPath.setPathParent(currentPath);
-                        logger.debug(" " + neighborPath.getNode().getAtom().getSymbol() + ", ");
+//                        System.out.print(" " + neighborPath.getNode() + ":");
                         openList.add(neighborPath);
                     }
                 }
@@ -134,28 +144,35 @@ public class BFSKSP {
         /*
          * No paths found
          */
-        return Collections.unmodifiableCollection(paths);
+        return Collections.unmodifiableList(paths);
     }
 
     public static void main(String[] args) throws InvalidSmilesException {
         IAtomContainer atomContainer = new AtomContainer();
-        IAtom atom1 = new Atom("C");
-        IAtom atom2 = new Atom("N");
+        IAtom atom1 = new Atom("Cl");
+        IAtom atom2 = new Atom("C");
         IAtom atom3 = new Atom("O");
-        IAtom atom4 = new Atom("S");
-        IAtom atom5 = new Atom("C");
+        IAtom atom4 = new Atom("N");
+        IAtom atom5 = new Atom("N");
+        IAtom atom6 = new Atom("S");
+        IAtom atom7 = new Atom("Br");
 
         IBond bond1 = new Bond(atom1, atom2, IBond.Order.SINGLE);
-        IBond bond2 = new Bond(atom1, atom3, IBond.Order.SINGLE);
-        IBond bond3 = new Bond(atom1, atom4, IBond.Order.SINGLE);
+        IBond bond2 = new Bond(atom2, atom3, IBond.Order.SINGLE);
+        IBond bond3 = new Bond(atom2, atom4, IBond.Order.SINGLE);
         IBond bond4 = new Bond(atom2, atom5, IBond.Order.SINGLE);
-        IBond bond5 = new Bond(atom3, atom5, IBond.Order.SINGLE);
+        IBond bond5 = new Bond(atom3, atom6, IBond.Order.SINGLE);
+        IBond bond6 = new Bond(atom1, atom3, IBond.Order.SINGLE);
+        IBond bond7 = new Bond(atom5, atom7, IBond.Order.SINGLE);
+        IBond bond8 = new Bond(atom4, atom7, IBond.Order.SINGLE);
 
         atomContainer.addAtom(atom1);
         atomContainer.addAtom(atom2);
         atomContainer.addAtom(atom3);
         atomContainer.addAtom(atom4);
         atomContainer.addAtom(atom5);
+        atomContainer.addAtom(atom6);
+        atomContainer.addAtom(atom7);
 
 
         atomContainer.addBond(bond1);
@@ -163,13 +180,29 @@ public class BFSKSP {
         atomContainer.addBond(bond3);
         atomContainer.addBond(bond4);
         atomContainer.addBond(bond5);
+        atomContainer.addBond(bond6);
+        atomContainer.addBond(bond7);
+        atomContainer.addBond(bond8);
 
-        AtomContainerGraph g = new AtomContainerGraph(atomContainer, true);
-        BFSKSP bfsksP = new BFSKSP(g, g.getVertexLookupMap().get(atom1));
-        Collection<List<AtomVertex>> kShortestPaths = bfsksP.getSinkKShorestPath(g.getVertexLookupMap().get(atom5));
+        AtomGraph g = new AtomGraph(atomContainer, true);
+        BFSSP bfsksP = new BFSSP(g, g.getVertexLookupMap().get(atom1));
+        Collection<Stack<AtomVertex>> kShortestPaths = bfsksP.getSinkKShorestPath(g.getVertexLookupMap().get(atom7));
 
-        for (List<AtomVertex> path : kShortestPaths) {
-            System.out.println(path);
+        System.out.println("BFS S");
+        for (Iterator<Stack<AtomVertex>> it = kShortestPaths.iterator(); it.hasNext();) {
+            Stack<AtomVertex> paths = it.next();
+            while (!paths.isEmpty()) {
+                System.out.print(paths.pop() + ", ");
+            }
+            System.out.println();
+        }
+        Collection<List<IAtom>> shortestPath = PathTools.getPathsOfLengthUpto(atomContainer, atom1, 4);
+        for (List<IAtom> l : shortestPath) {
+            System.out.println("CDK shortestPath: ");
+            for (IAtom a : l) {
+                System.out.print(a.getSymbol() + ", ");
+            }
+            System.out.println();
         }
     }
 }

@@ -23,7 +23,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.model;
+package graph.atom.model;
 
 import java.util.Collections;
 import java.util.Map;
@@ -38,7 +38,7 @@ import java.util.Map;
  */
 public class ShortestPathContainer {
 
-    private final AtomContainerGraph atomContainerGraph;
+    private final AtomGraph atomContainerGraph;
     private final AtomVertex start;
     private final Map<AtomVertex, Integer> path;
     private final Map<AtomVertex, AtomVertex> ancestors;
@@ -53,7 +53,7 @@ public class ShortestPathContainer {
     public ShortestPathContainer(
             Map<AtomVertex, Integer> path,
             Map<AtomVertex, AtomVertex> ancestors,
-            AtomContainerGraph atomContainerGraph,
+            AtomGraph atomContainerGraph,
             AtomVertex start) {
         super();
         this.path = path;
@@ -65,7 +65,7 @@ public class ShortestPathContainer {
     /**
      * @return the atomContainerGraph
      */
-    public AtomContainerGraph getAtomContainerGraph() {
+    public AtomGraph getAtomContainerGraph() {
         return atomContainerGraph;
     }
 

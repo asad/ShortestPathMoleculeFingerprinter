@@ -23,7 +23,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph.model;
+package graph.atom.model;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -31,13 +31,9 @@ import java.util.Map;
 
 /**
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class AdjacencyMatrix implements Serializable {
+public class AdjacencyAtomMatrix implements Serializable {
 
     private static final long serialVersionUID = 7688786252424151L;
     private Map<Integer, AtomVertex> lookupMap;
@@ -45,10 +41,10 @@ public class AdjacencyMatrix implements Serializable {
     private int currentIndex;
     private Integer[][] matrix;
 
-    public AdjacencyMatrix() {
+    public AdjacencyAtomMatrix() {
     }
 
-    public AdjacencyMatrix(int vertices) {
+    public AdjacencyAtomMatrix(int vertices) {
         super();
         this.matrix = new Integer[vertices][vertices];
         this.atomIndexMap = new HashMap<AtomVertex, Integer>();
@@ -66,18 +62,20 @@ public class AdjacencyMatrix implements Serializable {
             }
         }
     }
-    
+
     /**
      * Add an unweighted edge
+     *
      * @param source
      * @param sink
      */
     public void addEdge(AtomVertex source, AtomVertex sink) {
         addEdge(source, sink, 0);
     }
-    
+
     /**
      * Add a weighted edge
+     *
      * @param source
      * @param sink
      * @param weight
@@ -90,7 +88,6 @@ public class AdjacencyMatrix implements Serializable {
                 || j > matrix.length - 1) {
             return;
         }
-
         this.matrix[i][j] = Integer.valueOf(weight);
         this.lookupMap.put(j, sink);
     }
@@ -120,7 +117,7 @@ public class AdjacencyMatrix implements Serializable {
      * Add a vertex to the adjacency matrix
      *
      * @param atomVertex
-     * @return previous value associated with the key 
+     * @return previous value associated with the key
      */
     public Integer addVertex(AtomVertex atomVertex) {
         Integer value = this.atomIndexMap.put(atomVertex, currentIndex);
