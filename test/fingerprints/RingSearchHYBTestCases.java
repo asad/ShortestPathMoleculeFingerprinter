@@ -11,6 +11,8 @@ import org.junit.Test;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.fingerprint.FingerprinterTool;
+import org.openscience.cdk.fingerprint.HybridizationFingerprinter;
+import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.similarity.Tanimoto;
 import org.openscience.cdk.smiles.SmilesParser;
@@ -20,7 +22,7 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
  *
  * @author Asad
  */
-public class RingSearchSPTestCases {
+public class RingSearchHYBTestCases {
 
     @Test
     public void testGenerateFingerprintNaphthalene() throws InvalidSmilesException, Exception {
@@ -29,9 +31,7 @@ public class RingSearchSPTestCases {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
-        fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectFormalCharges(true);
+        IFingerprinter fingerprint = new HybridizationFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("Naphthalene fp " + fingerprint1.toString());
@@ -44,9 +44,7 @@ public class RingSearchSPTestCases {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
-        fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectFormalCharges(true);
+        IFingerprinter fingerprint = new HybridizationFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("Anthracene fp " + fingerprint1.toString());
@@ -60,9 +58,7 @@ public class RingSearchSPTestCases {
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
-        fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectFormalCharges(true);
+        IFingerprinter fingerprint = new HybridizationFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println(" Multiphtalene fp " + fingerprint1.toString());
@@ -71,9 +67,7 @@ public class RingSearchSPTestCases {
     @Test
     public void testGenerateFingerprintSimilarity() throws InvalidSmilesException, Exception {
 
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
-//        fingerprint.setRespectRingMatches(true);
-//        fingerprint.setRespectFormalCharges(true);
+        IFingerprinter fingerprint = new HybridizationFingerprinter(1024);
         Map<String, String> mols = new TreeMap<String, String>();
         mols.put("Multiphtalene", "C1=CC2=CC=C3C4=CC5=CC6=CC=CC=C6C=C5C=C4C=CC3=C2C=C1");
         mols.put("Anthracene", "C1=CC2=CC3=CC=CC=C3C=C2C=C1");

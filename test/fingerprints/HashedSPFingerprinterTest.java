@@ -62,10 +62,10 @@ public class HashedSPFingerprinterTest {
         BitSet fingerprintQ;
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
-        fingerprintT = fingerprint.getBitFingerprint(moleculeT).asBitSet();
-
         System.out.println("fpQ " + fingerprintQ.toString());
+        fingerprintT = fingerprint.getBitFingerprint(moleculeT).asBitSet();
         System.out.println("fpT " + fingerprintT.toString());
+        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
         System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
 
         Assert.assertTrue(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
