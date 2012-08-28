@@ -57,7 +57,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * A fingerprint is generated for an AtomContainer with this code:
  * <pre>
  *   AtomContainer molecule = new AtomContainer();
- *   IFingerprinter fingerprinter = new HashedSPFingerprinter();
+ *   IFingerprinter fingerprinter = new ShortestPathFingerprinter();
  *   IBitFingerprint fingerprint = fingerprinter.getFingerprint(molecule);
  *   This will respect rings systems.
  *   fingerprinter.setRespectRingMatches(true);
@@ -79,7 +79,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *
  * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprinter, Serializable {
+public class ShortestPathFingerprinter extends RandomNumber implements ISPFingerprinter, Serializable {
 
     /**
      * The default length of created fingerprints.
@@ -94,13 +94,13 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
     private boolean respectFormalCharges;
     private boolean respectStereoAssignments;
     private static ILoggingTool logger =
-            LoggingToolFactory.createLoggingTool(HashedSPFingerprinter.class);
+            LoggingToolFactory.createLoggingTool(ShortestPathFingerprinter.class);
 
     /**
      * Creates a fingerprint generator of length
      * <code>DEFAULT_SIZE</code>
      */
-    public HashedSPFingerprinter() {
+    public ShortestPathFingerprinter() {
         this(DEFAULT_SIZE);
     }
 
@@ -110,7 +110,7 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
      *
      * @param fingerprintLength The desired fingerprintLength of the fingerprint
      */
-    public HashedSPFingerprinter(int fingerprintLength) {
+    public ShortestPathFingerprinter(int fingerprintLength) {
         this.fingerprintLength = fingerprintLength;
         this.respectRingMatches = false;
         this.respectFormalCharges = false;
