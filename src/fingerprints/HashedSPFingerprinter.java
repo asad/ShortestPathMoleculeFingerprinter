@@ -216,6 +216,7 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
         // convert paths to hashes
         List<Integer> paths = new ArrayList<Integer>();
         int patternIndex = 0;
+
         for (String s : walker.getPaths()) {
             int toHashCode = s.hashCode();
             paths.add(patternIndex, toHashCode);
@@ -226,11 +227,13 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
             SSSRFinder finder = new SSSRFinder(container);
             IRingSet sssr = finder.findEssentialRings();
             RingSetManipulator.sort(sssr);
+            int ringCounter = sssr.getAtomContainerCount();
             for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
                 IAtomContainer ring = it.next();
-                int toHashCode = String.valueOf(ring.getAtomCount()).hashCode();
+                int toHashCode = String.valueOf(ringCounter * ring.getAtomCount()).hashCode();
                 paths.add(patternIndex, toHashCode);
                 patternIndex++;
+                ringCounter--;
             }
         }
 
@@ -267,12 +270,13 @@ public class HashedSPFingerprinter extends RandomNumber implements ISPFingerprin
             patternIndex++;
         }
 
-        StringBuilder stereoInformation = new StringBuilder();
-        stereoInformation.append("RAD: ".concat(String.valueOf(container.getSingleElectronCount())));
-        stereoInformation.append("LP: ".concat(String.valueOf(container.getLonePairCount())));
-        int totalHydrogenCount = AtomContainerManipulator.getTotalHydrogenCount(container);
-        stereoInformation.append("H: ".concat(String.valueOf(totalHydrogenCount)));
-        paths.add(patternIndex, stereoInformation.toString().hashCode());
+        StringBuilder radicalInformation = new StringBuilder();
+        radicalInformation.append("RAD: ".concat(String.valueOf(container.getSingleElectronCount())));
+        paths.add(patternIndex, radicalInformation.toString().hashCode());
+        patternIndex++;
+        StringBuilder lpInformation = new StringBuilder();
+        lpInformation.append("LP: ".concat(String.valueOf(container.getLonePairCount())));
+        paths.add(patternIndex, lpInformation.toString().hashCode());
         patternIndex++;
 
         return paths.toArray(new Integer[paths.size()]);

@@ -30,10 +30,11 @@ import graph.atom.algorithm.BFSSP;
 import graph.atom.model.AtomGraph;
 import graph.atom.model.AtomVertex;
 import java.util.*;
+import org.openscience.cdk.CDKConstants;
+import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
-import org.openscience.cdk.interfaces.IAtomType.Hybridization;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -51,8 +52,7 @@ public class MoleculeSPWalker implements ISPWalker {
     private final Set<String> cleanPath;
     private final List<String> pseudoAtoms;
     private int pseduoAtomCounter;
-    private final List<StringBuffer> allPaths;
-    private final Map<IAtom, Map<IAtom, IBond>> cache;
+    private final Set<StringBuffer> allPaths;
 
     /**
      *
@@ -64,10 +64,10 @@ public class MoleculeSPWalker implements ISPWalker {
         this.cleanPath = new HashSet<String>();
         this.atomContainer = (IAtomContainer) atomContainer.clone();
         AtomContainerManipulator.percieveAtomTypesAndConfigureUnsetProperties(this.atomContainer);
+        CDKHueckelAromaticityDetector.detectAromaticity(this.atomContainer);
         this.pseudoAtoms = new ArrayList<String>();
         this.pseduoAtomCounter = 0;
-        this.allPaths = new ArrayList<StringBuffer>();
-        this.cache = new HashMap<IAtom, Map<IAtom, IBond>>();
+        this.allPaths = new HashSet<StringBuffer>();
         findPaths();
     }
 
@@ -96,7 +96,9 @@ public class MoleculeSPWalker implements ISPWalker {
             if (s1.equals("")) {
                 continue;
             }
-            cleanPath.add(s1);
+            if (!cleanPath.contains(s1)) {
+                cleanPath.add(s1);
+            }
         }
     }
 
@@ -108,59 +110,55 @@ public class MoleculeSPWalker implements ISPWalker {
         for (Iterator<AtomVertex> it1 = atomContainerGraph.getVertexSet().iterator(); it1.hasNext();) {
             AtomVertex sourceAtom = it1.next();
             BFSSP sp = new BFSSP(atomContainerGraph, sourceAtom);
+            IAtom atom = sourceAtom.getAtom();
+            StringBuffer sb = new StringBuffer();
+            if (atom instanceof IPseudoAtom) {
+                if (!pseudoAtoms.contains(atom.getSymbol())) {
+                    pseudoAtoms.add(pseduoAtomCounter, atom.getSymbol());
+                    pseduoAtomCounter += 1;
+                }
+                sb.append((char) (PeriodicTable.getElementCount()
+                        + pseudoAtoms.indexOf(atom.getSymbol()) + 1));
+            } else {
+                Integer atnum = PeriodicTable.getAtomicNumber(atom.getSymbol());
+                if (atnum != null) {
+                    sb.append(toAtomPattern(atom));
+                } else {
+                    sb.append((char) PeriodicTable.getElementCount() + 1);
+                }
+            }
+            if (!allPaths.contains(sb)) {
+                allPaths.add(sb);
+            }
             for (Iterator<AtomVertex> it2 = atomContainerGraph.getVertexSet().iterator(); it2.hasNext();) {
                 AtomVertex sinkAtom = it2.next();
                 Collection<Stack<AtomVertex>> paths = sp.getSinkKShorestPath(sinkAtom);
                 for (Iterator<Stack<AtomVertex>> it3 = paths.iterator(); it3.hasNext();) {
                     Stack<AtomVertex> path = it3.next();
-                    StringBuffer sb = new StringBuffer();
-                    IAtom x = path.get(0).getAtom();
-                    if (x instanceof IPseudoAtom) {
-                        if (!pseudoAtoms.contains(x.getSymbol())) {
-                            pseudoAtoms.add(pseduoAtomCounter, x.getSymbol());
-                            pseduoAtomCounter += 1;
-                        }
-                        sb.append((char) (PeriodicTable.getElementCount()
-                                + pseudoAtoms.indexOf(x.getSymbol()) + 1));
-                    } else {
-                        Integer atnum = PeriodicTable.getAtomicNumber(x.getSymbol());
-                        if (atnum != null) {
-                            sb.append(toAtomPattern(x));
+                    sb = new StringBuffer();
+                    IAtom atomCurrent = path.pop().getAtom();
+
+                    while (!path.isEmpty()) {
+                        IAtom atomNext = path.pop().getAtom();
+                        if (atomCurrent instanceof IPseudoAtom) {
+                            if (!pseudoAtoms.contains(atomCurrent.getSymbol())) {
+                                pseudoAtoms.add(pseduoAtomCounter, atomCurrent.getSymbol());
+                                pseduoAtomCounter += 1;
+                            }
+                            sb.append((char) (PeriodicTable.getElementCount()
+                                    + pseudoAtoms.indexOf(atomCurrent.getSymbol()) + 1));
                         } else {
-                            sb.append((char) PeriodicTable.getElementCount() + 1);
+                            Integer atnum = PeriodicTable.getAtomicNumber(atomCurrent.getSymbol());
+                            if (atnum != null) {
+                                sb.append(toAtomPattern(atomCurrent));
+                            } else {
+                                sb.append((char) PeriodicTable.getElementCount() + 1);
+                            }
                         }
+                        sb.append(getBondSymbol(atomContainer.getBond(atomCurrent, atomNext)));
+                        atomCurrent = atomNext;
                     }
-                    for (int i = 1; i < path.size(); i++) {
-                        final IAtom[] y = {path.get(i).getAtom()};
-                        Map<IAtom, IBond> m = cache.get(x);
-                        final IBond[] b = {m != null ? m.get(y[0]) : null};
-                        if (b[0] == null) {
-                            b[0] = atomContainer.getBond(x, y[0]);
-                            cache.put(x,
-                                    new HashMap<IAtom, IBond>() {
-
-                                        {
-                                            put(y[0], b[0]);
-                                        }
-                                        private static final long serialVersionUID = 0xb3a7a32449fL;
-                                    });
-                        }
-                        sb.append(getBondSymbol(b[0]));
-                        sb.append(toAtomPattern(y[0]));
-                        x = y[0];
-                    }
-
-                    StringBuffer revForm = new StringBuffer(sb);
-                    revForm.reverse();
-                    if (sb.toString().compareTo(revForm.toString()) <= 0) {
-                        if (!allPaths.contains(sb)) {
-                            allPaths.add(sb);
-                        }
-                    } else {
-                        if (!allPaths.contains(revForm)) {
-                            allPaths.add(revForm);
-                        }
-                    }
+                    allPaths.add(sb);
                 }
             }
         }
@@ -199,12 +197,7 @@ public class MoleculeSPWalker implements ISPWalker {
      * Returns true if the bond binds two atoms, and both atoms are SP2.
      */
     private boolean isSP2Bond(IBond bond) {
-        if (bond.getAtomCount() == 2
-                && bond.getAtom(0).getHybridization() == Hybridization.SP2
-                && bond.getAtom(1).getHybridization() == Hybridization.SP2) {
-            return true;
-        }
-        return false;
+        return bond.getFlag(CDKConstants.ISAROMATIC);
     }
 
     @Override

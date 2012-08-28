@@ -188,6 +188,8 @@ public class BFSSP {
         BFSSP bfsksP = new BFSSP(g, g.getVertexLookupMap().get(atom1));
         Collection<Stack<AtomVertex>> kShortestPaths = bfsksP.getSinkKShorestPath(g.getVertexLookupMap().get(atom7));
 
+//        GraphOutputWriter.GraphMLWriter(pg.getGraph(), new File("example.gml"));
+
         System.out.println("BFS S");
         for (Iterator<Stack<AtomVertex>> it = kShortestPaths.iterator(); it.hasNext();) {
             Stack<AtomVertex> paths = it.next();
