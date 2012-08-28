@@ -1,6 +1,6 @@
 package example;
 
-import fingerprints.HashedSPFingerprinter;
+import fingerprints.ShortestPathFingerprinter;
 import java.util.BitSet;
 import junit.framework.Assert;
 import net.sf.jniinchi.INCHI_RET;
@@ -89,7 +89,7 @@ public class FPTest {
              * takes forever and eats all the memory it could find, starting with depth 6
              *
              */
-            HashedSPFingerprinter fp = new HashedSPFingerprinter(1024);
+            ShortestPathFingerprinter fp = new ShortestPathFingerprinter(1024);
 
             /*
              * here add code to configure atom types - and make sure to set atomic numbers as well, because

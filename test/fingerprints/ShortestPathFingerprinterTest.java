@@ -20,10 +20,10 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
  *
  * @author Asad
  */
-public class HashedSPFingerprinterTest {
+public class ShortestPathFingerprinterTest {
 
     /**
-     * Test of HashedSPFingerprinter method
+     * Test of ShortestPathFingerprinter method
      *
      * @throws InvalidSmilesException
      * @throws CDKException
@@ -35,14 +35,14 @@ public class HashedSPFingerprinterTest {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("fp " + fingerprint1.cardinality() + ":" + fingerprint1.toString());
     }
 
     /**
-     * Test of HashedSPFingerprinter method
+     * Test of ShortestPathFingerprinter method
      *
      * @throws InvalidSmilesException
      * @throws CDKException
@@ -58,7 +58,7 @@ public class HashedSPFingerprinterTest {
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
@@ -72,7 +72,7 @@ public class HashedSPFingerprinterTest {
     }
 
     /**
-     * Test of HashedSPFingerprinter method
+     * Test of ShortestPathFingerprinter method
      *
      * @throws InvalidSmilesException
      * @throws CDKException
@@ -91,7 +91,7 @@ public class HashedSPFingerprinterTest {
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
         System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
         System.out.println("Atom count T:" + moleculeT.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
@@ -111,7 +111,7 @@ public class HashedSPFingerprinterTest {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
@@ -126,7 +126,7 @@ public class HashedSPFingerprinterTest {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
@@ -142,7 +142,7 @@ public class HashedSPFingerprinterTest {
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;

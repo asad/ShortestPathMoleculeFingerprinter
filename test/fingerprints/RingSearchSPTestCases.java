@@ -29,7 +29,7 @@ public class RingSearchSPTestCases {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
@@ -44,7 +44,7 @@ public class RingSearchSPTestCases {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
@@ -60,7 +60,7 @@ public class RingSearchSPTestCases {
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
         System.out.println("Atom count " + molecule.getAtomCount());
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         fingerprint.setRespectRingMatches(true);
         fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
@@ -71,7 +71,7 @@ public class RingSearchSPTestCases {
     @Test
     public void testGenerateFingerprintSimilarity() throws InvalidSmilesException, Exception {
 
-        HashedSPFingerprinter fingerprint = new HashedSPFingerprinter(1024);
+        ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
 //        fingerprint.setRespectRingMatches(true);
 //        fingerprint.setRespectFormalCharges(true);
         Map<String, String> mols = new TreeMap<String, String>();
