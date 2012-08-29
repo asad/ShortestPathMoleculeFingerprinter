@@ -23,7 +23,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package fingerprints.helper;
+package fingerprints;
 
 import java.util.*;
 import org.openscience.cdk.CDKConstants;
@@ -39,10 +39,14 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
  *
- * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
+ * @author Syed Asad Rahman (2012) 
+ * @cdk.keyword fingerprint 
+ * @cdk.keyword similarity 
+ * @cdk.module standard 
+ * @cdk.githash
  *
  */
-public class ShortestPathWalker {
+class ShortestPathWalker {
 
     private static final long serialVersionUID = 0x3b728f46;
     private final IAtomContainer atomContainer;

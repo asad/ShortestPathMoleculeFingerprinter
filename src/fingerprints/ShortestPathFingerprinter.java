@@ -25,8 +25,6 @@
  */
 package fingerprints;
 
-import fingerprints.helper.ShortestPathWalker;
-import fingerprints.helper.RandomNumber;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
