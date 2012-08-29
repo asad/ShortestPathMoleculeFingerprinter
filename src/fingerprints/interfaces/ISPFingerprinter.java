@@ -23,7 +23,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
 package fingerprints.interfaces;
 
 import java.util.BitSet;
@@ -36,11 +35,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 
 /**
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
 public interface ISPFingerprinter extends org.openscience.cdk.fingerprint.IFingerprinter {
 

@@ -23,9 +23,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-package graph;
+package fingerprints.helper;
 
-import graph.atom.model.AtomVertex;
 import java.util.*;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -63,18 +62,6 @@ public class VertexCanonicalisation {
         Collections.sort(canonicalizedVertexList, new AtomComparator());
         return Collections.synchronizedCollection(canonicalizedVertexList);
     }
-
-    public Collection<IAtomContainer> canonicalizeAtomContainer(Collection<IAtomContainer> containers) {
-        List<IAtomContainer> canonicalizedVertexList = new LinkedList<IAtomContainer>();
-        int i = 0;
-        for (Iterator<IAtomContainer> it = containers.iterator(); it.hasNext();) {
-            IAtomContainer atom = it.next();
-            canonicalizedVertexList.add(i, atom);
-            i++;
-        }
-        Collections.sort(canonicalizedVertexList, new AtomContainerComparator());
-        return Collections.synchronizedCollection(canonicalizedVertexList);
-    }
 }
 
 class AtomComparator implements Comparator<IAtom> {
@@ -91,32 +78,5 @@ class AtomComparator implements Comparator<IAtom> {
             return 0;
         }
         return 10 * o1.getSymbol().compareToIgnoreCase(o2.getSymbol());
-    }
-}
-
-class AtomContainerComparator implements Comparator<IAtomContainer> {
-
-    @Override
-    public int compare(IAtomContainer o1, IAtomContainer o2) {
-        if (!(o1 instanceof IAtomContainer) || !(o2 instanceof IAtomContainer)) {
-            throw new ClassCastException();
-        }
-        List<String> mol1String = new ArrayList<String>();
-        List<String> mol2String = new ArrayList<String>();
-
-        for (IAtom atom : o1.atoms()) {
-            mol1String.add(atom.getSymbol());
-        }
-
-        for (IAtom atom : o2.atoms()) {
-            mol2String.add(atom.getSymbol());
-        }
-
-        Collections.sort(mol1String);
-        Collections.sort(mol2String);
-        String[] toArray1 = mol1String.toArray(new String[mol1String.size()]);
-        String[] toArray2 = mol2String.toArray(new String[mol2String.size()]);
-
-        return toArray1.toString().compareTo(toArray2.toString());
     }
 }

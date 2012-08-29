@@ -30,11 +30,7 @@ import java.util.Set;
 
 /**
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
 public interface ISPWalker extends Serializable {
 
@@ -50,5 +46,4 @@ public interface ISPWalker extends Serializable {
 
     @Override
     String toString();
-    
 }

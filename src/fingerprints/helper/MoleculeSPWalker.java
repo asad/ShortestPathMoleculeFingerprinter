@@ -26,13 +26,11 @@
 package fingerprints.helper;
 
 import fingerprints.interfaces.ISPWalker;
-import graph.atom.algorithm.BFSSP;
-import graph.atom.model.AtomGraph;
-import graph.atom.model.AtomVertex;
 import java.util.*;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
@@ -106,23 +104,21 @@ public class MoleculeSPWalker implements ISPWalker {
      * This module generates shortest path between two atoms
      */
     private void traverseShortestPaths() {
-        AtomGraph atomContainerGraph = new AtomGraph(atomContainer, false);
-        for (Iterator<AtomVertex> it1 = atomContainerGraph.getVertexSet().iterator(); it1.hasNext();) {
-            AtomVertex sourceAtom = it1.next();
-            BFSSP sp = new BFSSP(atomContainerGraph, sourceAtom);
-            IAtom atom = sourceAtom.getAtom();
+        Collection<IAtom> canonicalizeAtoms = new VertexCanonicalisation().canonicalizeAtoms(atomContainer);
+
+        for (IAtom sourceAtom : canonicalizeAtoms) {
             StringBuffer sb = new StringBuffer();
-            if (atom instanceof IPseudoAtom) {
-                if (!pseudoAtoms.contains(atom.getSymbol())) {
-                    pseudoAtoms.add(pseduoAtomCounter, atom.getSymbol());
+            if (sourceAtom instanceof IPseudoAtom) {
+                if (!pseudoAtoms.contains(sourceAtom.getSymbol())) {
+                    pseudoAtoms.add(pseduoAtomCounter, sourceAtom.getSymbol());
                     pseduoAtomCounter += 1;
                 }
                 sb.append((char) (PeriodicTable.getElementCount()
-                        + pseudoAtoms.indexOf(atom.getSymbol()) + 1));
+                        + pseudoAtoms.indexOf(sourceAtom.getSymbol()) + 1));
             } else {
-                Integer atnum = PeriodicTable.getAtomicNumber(atom.getSymbol());
+                Integer atnum = PeriodicTable.getAtomicNumber(sourceAtom.getSymbol());
                 if (atnum != null) {
-                    sb.append(toAtomPattern(atom));
+                    sb.append(toAtomPattern(sourceAtom));
                 } else {
                     sb.append((char) PeriodicTable.getElementCount() + 1);
                 }
@@ -130,36 +126,38 @@ public class MoleculeSPWalker implements ISPWalker {
             if (!allPaths.contains(sb)) {
                 allPaths.add(sb);
             }
-            for (Iterator<AtomVertex> it2 = atomContainerGraph.getVertexSet().iterator(); it2.hasNext();) {
-                AtomVertex sinkAtom = it2.next();
-                Collection<Stack<AtomVertex>> paths = sp.getSinkKShorestPath(sinkAtom);
-                for (Iterator<Stack<AtomVertex>> it3 = paths.iterator(); it3.hasNext();) {
-                    Stack<AtomVertex> path = it3.next();
-                    sb = new StringBuffer();
-                    IAtom atomCurrent = path.pop().getAtom();
-
-                    while (!path.isEmpty()) {
-                        IAtom atomNext = path.pop().getAtom();
-                        if (atomCurrent instanceof IPseudoAtom) {
-                            if (!pseudoAtoms.contains(atomCurrent.getSymbol())) {
-                                pseudoAtoms.add(pseduoAtomCounter, atomCurrent.getSymbol());
-                                pseduoAtomCounter += 1;
-                            }
-                            sb.append((char) (PeriodicTable.getElementCount()
-                                    + pseudoAtoms.indexOf(atomCurrent.getSymbol()) + 1));
-                        } else {
-                            Integer atnum = PeriodicTable.getAtomicNumber(atomCurrent.getSymbol());
-                            if (atnum != null) {
-                                sb.append(toAtomPattern(atomCurrent));
-                            } else {
-                                sb.append((char) PeriodicTable.getElementCount() + 1);
-                            }
-                        }
-                        sb.append(getBondSymbol(atomContainer.getBond(atomCurrent, atomNext)));
-                        atomCurrent = atomNext;
-                    }
-                    allPaths.add(sb);
+            for (IAtom sinkAtom : canonicalizeAtoms) {
+                if (sourceAtom == sinkAtom) {
+                    continue;
                 }
+                List<IAtom> shortestPath = PathTools.getShortestPath(atomContainer, sourceAtom, sinkAtom);
+                if (shortestPath == null || shortestPath.isEmpty() || shortestPath.size() < 2) {
+                    continue;
+                }
+                //System.out.println("Path length " + shortestPath.size());
+                IAtom atomCurrent = shortestPath.get(0);
+                for (int i = 1; i < shortestPath.size(); i++) {
+                    IAtom atomNext = shortestPath.get(i);
+                    sb = new StringBuffer();
+                    if (atomCurrent instanceof IPseudoAtom) {
+                        if (!pseudoAtoms.contains(atomCurrent.getSymbol())) {
+                            pseudoAtoms.add(pseduoAtomCounter, atomCurrent.getSymbol());
+                            pseduoAtomCounter += 1;
+                        }
+                        sb.append((char) (PeriodicTable.getElementCount()
+                                + pseudoAtoms.indexOf(atomCurrent.getSymbol()) + 1));
+                    } else {
+                        Integer atnum = PeriodicTable.getAtomicNumber(atomCurrent.getSymbol());
+                        if (atnum != null) {
+                            sb.append(toAtomPattern(atomCurrent));
+                        } else {
+                            sb.append((char) PeriodicTable.getElementCount() + 1);
+                        }
+                    }
+                    sb.append(getBondSymbol(atomContainer.getBond(atomCurrent, atomNext)));
+                    atomCurrent = atomNext;
+                }
+                allPaths.add(sb);
             }
         }
     }
