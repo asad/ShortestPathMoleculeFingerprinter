@@ -72,8 +72,8 @@ public class RingSearchSPTestCases {
     public void testGenerateFingerprintSimilarity() throws InvalidSmilesException, Exception {
 
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
-//        fingerprint.setRespectRingMatches(true);
-//        fingerprint.setRespectFormalCharges(true);
+        fingerprint.setRespectRingMatches(true);
+        fingerprint.setRespectFormalCharges(true);
         Map<String, String> mols = new TreeMap<String, String>();
         mols.put("Multiphtalene", "C1=CC2=CC=C3C4=CC5=CC6=CC=CC=C6C=C5C=C4C=CC3=C2C=C1");
         mols.put("Anthracene", "C1=CC2=CC3=CC=CC=C3C=C2C=C1");
