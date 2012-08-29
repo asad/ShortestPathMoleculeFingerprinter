@@ -60,9 +60,9 @@ public class FingerprinterTest {
         IAtomContainer mol2 = MoleculeFactory.makePyrrole();
         ShortestPathFingerprinter fingerprinter = new ShortestPathFingerprinter();
         IBitFingerprint bs1 = fingerprinter.getBitFingerprint(mol1);
-        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 18, bs1.cardinality());
+        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 22, bs1.cardinality());
         IBitFingerprint bs2 = fingerprinter.getBitFingerprint(mol2);
-        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 9, bs2.cardinality());
+        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 11, bs2.cardinality());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class FingerprinterTest {
         Assert.assertNotNull(fingerprinter);
         IAtomContainer mol = MoleculeFactory.makeIndole();
         BitSet bs = fingerprinter.getBitFingerprint(mol).asBitSet();
-        Assert.assertEquals(1009, bs.length()); // highest set bit
+        Assert.assertEquals(1024, bs.length()); // highest set bit
         Assert.assertEquals(1024, bs.size()); // actual bit set size
     }
 
@@ -140,11 +140,10 @@ public class FingerprinterTest {
 
         ShortestPathFingerprinter fp = new ShortestPathFingerprinter();
         BitSet b1 = fp.getBitFingerprint(butane).asBitSet();
+        //System.out.println("f1:" + b1);
         BitSet b2 = fp.getBitFingerprint(propylAmine).asBitSet();
+        //System.out.println("f2:" + b2);
 
-        System.out.println("f1:" + b1);
-        System.out.println("f2:" + b2);
-        
         Assert.assertFalse(FingerprinterTool.isSubset(b2, b1));
         Assert.assertFalse("butane should not be a substructure of propylamine", FingerprinterTool.isSubset(b2, b1));
     }
@@ -274,10 +273,21 @@ public class FingerprinterTest {
 
     public static IAtomContainer makeButane() {
         IAtomContainer mol = DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class);
-        mol.addAtom(new Atom("C")); // 0
-        mol.addAtom(new Atom("C")); // 1
-        mol.addAtom(new Atom("C")); // 2
-        mol.addAtom(new Atom("C")); // 3
+        Atom atom = new Atom("C");
+        atom.setID("0");
+        mol.addAtom(atom); // 0
+
+        atom = new Atom("C");
+        atom.setID("1");
+        mol.addAtom(atom); // 1
+
+        atom = new Atom("C");
+        atom.setID("2");
+        mol.addAtom(atom); // 2
+
+        atom = new Atom("C");
+        atom.setID("3");
+        mol.addAtom(atom); // 3
 
         mol.addBond(0, 1, IBond.Order.SINGLE); // 1
         mol.addBond(1, 2, IBond.Order.SINGLE); // 2
@@ -288,10 +298,21 @@ public class FingerprinterTest {
 
     public static IAtomContainer makePropylAmine() {
         IAtomContainer mol = DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class);
-        mol.addAtom(new Atom("C")); // 0
-        mol.addAtom(new Atom("C")); // 1
-        mol.addAtom(new Atom("C")); // 2
-        mol.addAtom(new Atom("N")); // 3
+        Atom atom = new Atom("C");
+        atom.setID("0");
+        mol.addAtom(atom); // 0
+
+        atom = new Atom("C");
+        atom.setID("1");
+        mol.addAtom(atom); // 1
+
+        atom = new Atom("C");
+        atom.setID("2");
+        mol.addAtom(atom); // 2
+
+        atom = new Atom("N");
+        atom.setID("3");
+        mol.addAtom(atom); // 3
 
         mol.addBond(0, 1, IBond.Order.SINGLE); // 1
         mol.addBond(1, 2, IBond.Order.SINGLE); // 2
