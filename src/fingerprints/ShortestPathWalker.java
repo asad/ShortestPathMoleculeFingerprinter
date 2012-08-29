@@ -185,8 +185,7 @@ class ShortestPathWalker {
      * Returns true if the bond binds two atoms, and both atoms are SP2.
      */
     private boolean isSP2Bond(IBond bond) {
-        return bond.getAtom(0).getFlag(CDKConstants.ISAROMATIC)
-                && bond.getAtom(1).getFlag(CDKConstants.ISAROMATIC);
+        return bond.getFlag(CDKConstants.ISAROMATIC);
     }
 
     @Override

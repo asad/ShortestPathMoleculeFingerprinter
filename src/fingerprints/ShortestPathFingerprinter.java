@@ -28,12 +28,13 @@ package fingerprints;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
+import org.openscience.cdk.annotations.TestClass;
+import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.*;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.*;
-import org.openscience.cdk.interfaces.IAtomType.Hybridization;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
@@ -62,12 +63,16 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * <p>The FingerPrinter assumes that hydrogens are explicitly given! Furthermore, if pseudo atoms or atoms with
  * malformed symbols are present, their atomic number is taken as one more than the last element currently supported in {@link PeriodicTable}.
  *
- * <p>Unlike the {@link Fingerprinter}, this fingerprinter does not take into account aromaticity. Instead, it takes
- * into account SP2
- * {@link Hybridization}.
+ * 
+ * 
+ * @author Syed Asad Rahman (2012) 
+ * @cdk.keyword fingerprint 
+ * @cdk.keyword similarity 
+ * @cdk.module standard 
+ * @cdk.githash
  *
- * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
+@TestClass("org.openscience.cdk.fingerprint.ShortestPathFingerprinter")
 public class ShortestPathFingerprinter extends RandomNumber implements IFingerprinter, Serializable {
 
     /**
@@ -86,6 +91,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      * Creates a fingerprint generator of length
      * <code>DEFAULT_SIZE</code>
      */
+    @TestMethod("testFingerprint")
     public ShortestPathFingerprinter() {
         this(DEFAULT_SIZE);
     }
@@ -108,6 +114,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      * @return A {@link BitSet} representing the fingerprint
      */
     @Override
+    @TestMethod("testgetBitFingerprint_IAtomContainer")
     public IBitFingerprint getBitFingerprint(
             IAtomContainer atomContainer)
             throws CDKException {
@@ -218,7 +225,9 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
-
+        /*
+         * Check for the charges
+         */
         List<String> l = new ArrayList<String>();
         for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
             IAtom atom = it.next();
@@ -265,6 +274,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
     }
 
     @Override
+    @TestMethod("testSize")
     public int getSize() {
         return fingerprintLength;
     }
