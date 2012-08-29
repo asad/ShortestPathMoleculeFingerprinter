@@ -30,11 +30,12 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObject;
 
+
 /**
  *
  * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class VertexCanonicalisation {
+public class SimpleAtomCanonicalisation {
 
     /**
      * @param atomSet the atomSet to set
@@ -63,7 +64,6 @@ public class VertexCanonicalisation {
         return Collections.synchronizedCollection(canonicalizedVertexList);
     }
 }
-
 class AtomComparator implements Comparator<IAtom> {
 
     @Override

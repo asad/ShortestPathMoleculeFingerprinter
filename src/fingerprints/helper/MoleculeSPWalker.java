@@ -104,7 +104,7 @@ public class MoleculeSPWalker implements ISPWalker {
      * This module generates shortest path between two atoms
      */
     private void traverseShortestPaths() {
-        Collection<IAtom> canonicalizeAtoms = new VertexCanonicalisation().canonicalizeAtoms(atomContainer);
+        Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalisation().canonicalizeAtoms(atomContainer);
 
         for (IAtom sourceAtom : canonicalizeAtoms) {
             StringBuffer sb = new StringBuffer();
