@@ -25,19 +25,14 @@
  */
 package fingerprints;
 
-import fingerprints.helper.MoleculeSPWalker;
+import fingerprints.helper.ShortestPathWalker;
 import fingerprints.helper.RandomNumber;
-import fingerprints.interfaces.ISPFingerprinter;
-import fingerprints.interfaces.ISPWalker;
 import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Level;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.fingerprint.BitSetFingerprint;
-import org.openscience.cdk.fingerprint.Fingerprinter;
-import org.openscience.cdk.fingerprint.IBitFingerprint;
-import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.fingerprint.*;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.interfaces.IAtomType.Hybridization;
@@ -59,10 +54,6 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *   AtomContainer molecule = new AtomContainer();
  *   IFingerprinter fingerprinter = new ShortestPathFingerprinter();
  *   IBitFingerprint fingerprint = fingerprinter.getFingerprint(molecule);
- *   This will respect rings systems.
- *   fingerprinter.setRespectRingMatches(true);
- *   This will respect charges
- *   fingerprinter.setRespectFormalCharges(true);
  *   fingerprint.fingerprintLength(); // returns 1024 by default
  *   fingerprint.length(); // returns the highest set bit
  * </pre> <p>
@@ -79,7 +70,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *
  * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  */
-public class ShortestPathFingerprinter extends RandomNumber implements ISPFingerprinter, Serializable {
+public class ShortestPathFingerprinter extends RandomNumber implements IFingerprinter, Serializable {
 
     /**
      * The default length of created fingerprints.
@@ -90,9 +81,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements ISPFinger
      * The default length of created fingerprints.
      */
     private int fingerprintLength;
-    private boolean respectRingMatches;
-    private boolean respectFormalCharges;
-    private boolean respectStereoAssignments;
     private static ILoggingTool logger =
             LoggingToolFactory.createLoggingTool(ShortestPathFingerprinter.class);
 
@@ -112,9 +100,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements ISPFinger
      */
     public ShortestPathFingerprinter(int fingerprintLength) {
         this.fingerprintLength = fingerprintLength;
-        this.respectRingMatches = false;
-        this.respectFormalCharges = false;
-        this.respectStereoAssignments = false;
     }
 
     /**
@@ -212,7 +197,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements ISPFinger
      */
     protected Integer[] findPaths(IAtomContainer container) throws CloneNotSupportedException, CDKException {
 
-        ISPWalker walker = new MoleculeSPWalker(container);
+        ShortestPathWalker walker = new ShortestPathWalker(container);
         // convert paths to hashes
         List<Integer> paths = new ArrayList<Integer>();
         int patternIndex = 0;
@@ -222,62 +207,59 @@ public class ShortestPathFingerprinter extends RandomNumber implements ISPFinger
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
-
-        if (isRespectRingMatches()) {
-            SSSRFinder finder = new SSSRFinder(container);
-            IRingSet sssr = finder.findEssentialRings();
-            RingSetManipulator.sort(sssr);
-            int ringCounter = sssr.getAtomContainerCount();
-            for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
-                IAtomContainer ring = it.next();
-                int toHashCode = String.valueOf(ringCounter * ring.getAtomCount()).hashCode();
-                paths.add(patternIndex, toHashCode);
-                patternIndex++;
-                ringCounter--;
-            }
-        }
-
-        if (isRespectFormalCharges()) {
-            List<String> l = new ArrayList<String>();
-            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
-                IAtom atom = it.next();
-                int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
-                if (charge != 0) {
-                    l.add(atom.getSymbol().concat(String.valueOf(charge)));
-                }
-            }
-            Collections.sort(l);
-            int toHashCode = l.hashCode();
+        SSSRFinder finder = new SSSRFinder(container);
+        IRingSet sssr = finder.findEssentialRings();
+        RingSetManipulator.sort(sssr);
+        int ringCounter = sssr.getAtomContainerCount();
+        for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
+            IAtomContainer ring = it.next();
+            int toHashCode = String.valueOf(ringCounter * ring.getAtomCount()).hashCode();
             paths.add(patternIndex, toHashCode);
             patternIndex++;
+            ringCounter--;
         }
 
-        if (isRespectStereoAssignments()) {
-            List<String> l = new ArrayList<String>();
-            /*
-             * atom stereo parity
-             */
-            for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
-                IAtom atom = it.next();
-                int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity().intValue();
-                if (st != 0) {
-                    l.add(atom.getSymbol().concat(String.valueOf(st)));
-                }
+        List<String> l = new ArrayList<String>();
+        for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+            IAtom atom = it.next();
+            int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
+            if (charge != 0) {
+                l.add(atom.getSymbol().concat(String.valueOf(charge)));
             }
-            Collections.sort(l);
-            int toHashCode = l.hashCode();
-            paths.add(patternIndex, toHashCode);
+        }
+        Collections.sort(l);
+        int toHashCode = l.hashCode();
+        paths.add(patternIndex, toHashCode);
+        patternIndex++;
+
+        l = new ArrayList<String>();
+        /*
+         * atom stereo parity
+         */
+        for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+            IAtom atom = it.next();
+            int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity().intValue();
+            if (st != 0) {
+                l.add(atom.getSymbol().concat(String.valueOf(st)));
+            }
+        }
+        Collections.sort(l);
+        toHashCode = l.hashCode();
+        paths.add(patternIndex, toHashCode);
+        patternIndex++;
+
+        if (container.getSingleElectronCount() > 0) {
+            StringBuilder radicalInformation = new StringBuilder();
+            radicalInformation.append("RAD: ".concat(String.valueOf(container.getSingleElectronCount())));
+            paths.add(patternIndex, radicalInformation.toString().hashCode());
             patternIndex++;
         }
-
-        StringBuilder radicalInformation = new StringBuilder();
-        radicalInformation.append("RAD: ".concat(String.valueOf(container.getSingleElectronCount())));
-        paths.add(patternIndex, radicalInformation.toString().hashCode());
-        patternIndex++;
-        StringBuilder lpInformation = new StringBuilder();
-        lpInformation.append("LP: ".concat(String.valueOf(container.getLonePairCount())));
-        paths.add(patternIndex, lpInformation.toString().hashCode());
-        patternIndex++;
+        if (container.getLonePairCount() > 0) {
+            StringBuilder lpInformation = new StringBuilder();
+            lpInformation.append("LP: ".concat(String.valueOf(container.getLonePairCount())));
+            paths.add(patternIndex, lpInformation.toString().hashCode());
+            patternIndex++;
+        }
 
         return paths.toArray(new Integer[paths.size()]);
     }
@@ -287,63 +269,8 @@ public class ShortestPathFingerprinter extends RandomNumber implements ISPFinger
         return fingerprintLength;
     }
 
-    /**
-     * Should match rings to rings and non-rings to non-rings
-     *
-     * @return the respect ring matches
-     */
-    @Override
-    public boolean isRespectRingMatches() {
-        return respectRingMatches;
-    }
-
-    /**
-     * Ring matches are allowed and non-ring to ring matches are discarded
-     *
-     * @param respectRingMatches respect the ring-to-ring matches and discard non-ring to ring matches
-     */
-    @Override
-    public void setRespectRingMatches(boolean respectRingMatches) {
-        this.respectRingMatches = respectRingMatches;
-    }
-
-    /**
-     * @return the respectFormalCharges
-     */
-    @Override
-    public boolean isRespectFormalCharges() {
-        return respectFormalCharges;
-    }
-
-    /**
-     * @param respectFormalCharges the flag to set if formal charge is checked
-     */
-    @Override
-    public void setRespectFormalCharges(boolean respectFormalCharges) {
-        this.respectFormalCharges = respectFormalCharges;
-    }
-
-    @Override
-    public int getSearchDepth() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
     @Override
     public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
         throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    /**
-     * @return the respectStereoAssignments
-     */
-    public boolean isRespectStereoAssignments() {
-        return respectStereoAssignments;
-    }
-
-    /**
-     * @param respectStereoAssignments the respectStereoAssignments to set
-     */
-    public void setRespectStereoAssignments(boolean respectStereoAssignments) {
-        this.respectStereoAssignments = respectStereoAssignments;
     }
 }

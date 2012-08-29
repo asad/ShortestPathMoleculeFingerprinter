@@ -25,7 +25,6 @@
  */
 package fingerprints.helper;
 
-import fingerprints.interfaces.ISPWalker;
 import java.util.*;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
@@ -43,7 +42,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  *
  */
-public class MoleculeSPWalker implements ISPWalker {
+public class ShortestPathWalker {
 
     private static final long serialVersionUID = 0x3b728f46;
     private final IAtomContainer atomContainer;
@@ -58,7 +57,7 @@ public class MoleculeSPWalker implements ISPWalker {
      * @throws CloneNotSupportedException
      * @throws CDKException
      */
-    public MoleculeSPWalker(IAtomContainer atomContainer) throws CloneNotSupportedException, CDKException {
+    public ShortestPathWalker(IAtomContainer atomContainer) throws CloneNotSupportedException, CDKException {
         this.cleanPath = new HashSet<String>();
         this.atomContainer = (IAtomContainer) atomContainer.clone();
         AtomContainerManipulator.percieveAtomTypesAndConfigureUnsetProperties(this.atomContainer);
@@ -72,7 +71,6 @@ public class MoleculeSPWalker implements ISPWalker {
     /**
      * @return the cleanPath
      */
-    @Override
     public Set<String> getPaths() {
         return Collections.unmodifiableSet(cleanPath);
     }
@@ -80,7 +78,6 @@ public class MoleculeSPWalker implements ISPWalker {
     /**
      * @return the cleanPath
      */
-    @Override
     public int getPathCount() {
         return cleanPath.size();
     }
