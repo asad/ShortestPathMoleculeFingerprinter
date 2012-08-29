@@ -112,8 +112,6 @@ public class ShortestPathFingerprinterTest {
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
-        fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("fp " + fingerprint1.toString());
@@ -127,8 +125,6 @@ public class ShortestPathFingerprinterTest {
         IAtomContainer molecule = smilesParser.parseSmiles(smiles);
         System.out.println("Atom count " + molecule.getAtomCount());
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
-        fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("fp " + fingerprint1.toString());
@@ -143,8 +139,6 @@ public class ShortestPathFingerprinterTest {
         AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(molecule);
         System.out.println("Atom count " + molecule.getAtomCount());
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
-        fingerprint.setRespectRingMatches(true);
-        fingerprint.setRespectFormalCharges(true);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
         System.out.println("fp " + fingerprint1.toString());
