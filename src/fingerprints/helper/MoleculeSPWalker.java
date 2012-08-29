@@ -127,6 +127,7 @@ public class MoleculeSPWalker implements ISPWalker {
                 allPaths.add(sb);
             }
             for (IAtom sinkAtom : canonicalizeAtoms) {
+                sb = new StringBuffer();
                 if (sourceAtom == sinkAtom) {
                     continue;
                 }
@@ -138,7 +139,6 @@ public class MoleculeSPWalker implements ISPWalker {
                 IAtom atomCurrent = shortestPath.get(0);
                 for (int i = 1; i < shortestPath.size(); i++) {
                     IAtom atomNext = shortestPath.get(i);
-                    sb = new StringBuffer();
                     if (atomCurrent instanceof IPseudoAtom) {
                         if (!pseudoAtoms.contains(atomCurrent.getSymbol())) {
                             pseudoAtoms.add(pseduoAtomCounter, atomCurrent.getSymbol());
