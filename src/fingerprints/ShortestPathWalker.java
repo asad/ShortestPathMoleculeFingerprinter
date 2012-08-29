@@ -39,11 +39,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard 
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  *
  */
 class ShortestPathWalker {
@@ -105,25 +101,13 @@ class ShortestPathWalker {
      * This module generates shortest path between two atoms
      */
     private void traverseShortestPaths() {
+        /*
+         * Canonicalisation of atoms for reporting unique paths with consistency
+         */
         Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalisation().canonicalizeAtoms(atomContainer);
-
         for (IAtom sourceAtom : canonicalizeAtoms) {
             StringBuffer sb = new StringBuffer();
-            if (sourceAtom instanceof IPseudoAtom) {
-                if (!pseudoAtoms.contains(sourceAtom.getSymbol())) {
-                    pseudoAtoms.add(pseduoAtomCounter, sourceAtom.getSymbol());
-                    pseduoAtomCounter += 1;
-                }
-                sb.append((char) (PeriodicTable.getElementCount()
-                        + pseudoAtoms.indexOf(sourceAtom.getSymbol()) + 1));
-            } else {
-                Integer atnum = PeriodicTable.getAtomicNumber(sourceAtom.getSymbol());
-                if (atnum != null) {
-                    sb.append(toAtomPattern(sourceAtom));
-                } else {
-                    sb.append((char) PeriodicTable.getElementCount() + 1);
-                }
-            }
+            setAtom(sourceAtom, sb);
             if (!allPaths.contains(sb)) {
                 allPaths.add(sb);
             }
@@ -140,25 +124,30 @@ class ShortestPathWalker {
                 IAtom atomCurrent = shortestPath.get(0);
                 for (int i = 1; i < shortestPath.size(); i++) {
                     IAtom atomNext = shortestPath.get(i);
-                    if (atomCurrent instanceof IPseudoAtom) {
-                        if (!pseudoAtoms.contains(atomCurrent.getSymbol())) {
-                            pseudoAtoms.add(pseduoAtomCounter, atomCurrent.getSymbol());
-                            pseduoAtomCounter += 1;
-                        }
-                        sb.append((char) (PeriodicTable.getElementCount()
-                                + pseudoAtoms.indexOf(atomCurrent.getSymbol()) + 1));
-                    } else {
-                        Integer atnum = PeriodicTable.getAtomicNumber(atomCurrent.getSymbol());
-                        if (atnum != null) {
-                            sb.append(toAtomPattern(atomCurrent));
-                        } else {
-                            sb.append((char) PeriodicTable.getElementCount() + 1);
-                        }
-                    }
+                    setAtom(atomCurrent, sb);
                     sb.append(getBondSymbol(atomContainer.getBond(atomCurrent, atomNext)));
                     atomCurrent = atomNext;
                 }
+                setAtom(atomCurrent, sb);
                 allPaths.add(sb);
+            }
+        }
+    }
+
+    private void setAtom(IAtom atomCurrent, StringBuffer sb) {
+        if (atomCurrent instanceof IPseudoAtom) {
+            if (!pseudoAtoms.contains(atomCurrent.getSymbol())) {
+                pseudoAtoms.add(pseduoAtomCounter, atomCurrent.getSymbol());
+                pseduoAtomCounter += 1;
+            }
+            sb.append((char) (PeriodicTable.getElementCount()
+                    + pseudoAtoms.indexOf(atomCurrent.getSymbol()) + 1));
+        } else {
+            Integer atnum = PeriodicTable.getAtomicNumber(atomCurrent.getSymbol());
+            if (atnum != null) {
+                sb.append(toAtomPattern(atomCurrent));
+            } else {
+                sb.append((char) PeriodicTable.getElementCount() + 1);
             }
         }
     }
@@ -196,7 +185,8 @@ class ShortestPathWalker {
      * Returns true if the bond binds two atoms, and both atoms are SP2.
      */
     private boolean isSP2Bond(IBond bond) {
-        return bond.getFlag(CDKConstants.ISAROMATIC);
+        return bond.getAtom(0).getFlag(CDKConstants.ISAROMATIC)
+                && bond.getAtom(1).getFlag(CDKConstants.ISAROMATIC);
     }
 
     @Override

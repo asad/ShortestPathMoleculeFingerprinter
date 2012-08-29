@@ -205,16 +205,18 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
+
+        /*
+         * Add ring information
+         */
         SSSRFinder finder = new SSSRFinder(container);
         IRingSet sssr = finder.findEssentialRings();
         RingSetManipulator.sort(sssr);
-        int ringCounter = sssr.getAtomContainerCount();
         for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
             IAtomContainer ring = it.next();
-            int toHashCode = String.valueOf(ringCounter * ring.getAtomCount()).hashCode();
+            int toHashCode = String.valueOf(ring.getAtomCount()).hashCode();
             paths.add(patternIndex, toHashCode);
             patternIndex++;
-            ringCounter--;
         }
 
         List<String> l = new ArrayList<String>();
