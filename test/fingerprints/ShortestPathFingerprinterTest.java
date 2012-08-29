@@ -38,7 +38,9 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        System.out.println("fp " + fingerprint1.cardinality() + ":" + fingerprint1.toString());
+        Assert.assertEquals(125,fingerprint1.cardinality());
+        Assert.assertEquals(1024,fingerprint1.size());
+//        System.out.println("fp " + fingerprint1.cardinality() + ":" + fingerprint1.toString());
     }
 
     /**
@@ -56,17 +58,17 @@ public class ShortestPathFingerprinterTest {
         SmilesParser smilesParser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
         IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesQ);
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
-        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
-        System.out.println("Atom count T:" + moleculeT.getAtomCount());
+//        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
+//        System.out.println("Atom count T:" + moleculeT.getAtomCount());
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
-        System.out.println("fpQ " + fingerprintQ.toString());
+//        System.out.println("fpQ " + fingerprintQ.toString());
         fingerprintT = fingerprint.getBitFingerprint(moleculeT).asBitSet();
-        System.out.println("fpT " + fingerprintT.toString());
-        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
-        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
+//        System.out.println("fpT " + fingerprintT.toString());
+//        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintQ, fingerprintT));
+//        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
 
         Assert.assertTrue(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
     }
@@ -89,17 +91,17 @@ public class ShortestPathFingerprinterTest {
         IAtomContainer moleculeQ = smilesParser.parseSmiles(smilesQ);
 
         IAtomContainer moleculeT = smilesParser.parseSmiles(smilesT);
-        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
-        System.out.println("Atom count T:" + moleculeT.getAtomCount());
+//        System.out.println("Atom count Q:" + moleculeQ.getAtomCount());
+//        System.out.println("Atom count T:" + moleculeT.getAtomCount());
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprintQ;
         BitSet fingerprintT;
         fingerprintQ = fingerprint.getBitFingerprint(moleculeQ).asBitSet();
         fingerprintT = fingerprint.getBitFingerprint(moleculeT).asBitSet();
 
-        System.out.println("fpQ " + fingerprintQ.toString());
-        System.out.println("fpT " + fingerprintT.toString());
-        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
+//        System.out.println("fpQ " + fingerprintQ.toString());
+//        System.out.println("fpT " + fingerprintT.toString());
+//        System.out.println("isSubset: " + FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
 
         Assert.assertFalse(FingerprinterTool.isSubset(fingerprintT, fingerprintQ));
     }
@@ -114,7 +116,8 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        System.out.println("fp " + fingerprint1.toString());
+        Assert.assertEquals(10,fingerprint1.cardinality());
+//        System.out.println("fp " + fingerprint1.toString());
     }
 
     @Test
@@ -127,7 +130,8 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        System.out.println("fp " + fingerprint1.toString());
+        Assert.assertEquals(8,fingerprint1.cardinality());
+//        System.out.println("fp " + fingerprint1.toString());
     }
 
     @Test
@@ -141,6 +145,7 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        System.out.println("fp " + fingerprint1.toString());
+        Assert.assertEquals(16,fingerprint1.cardinality());
+//        System.out.println("fp " + fingerprint1.toString());
     }
 }
