@@ -118,15 +118,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
     public IBitFingerprint getBitFingerprint(
             IAtomContainer atomContainer)
             throws CDKException {
-        logger.debug("Entering Fingerprinter");
-        logger.debug("Starting Aromaticity Detection");
-        long before = System.currentTimeMillis();
-        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
-        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
-        long after = System.currentTimeMillis();
-        logger.debug("time for aromaticity calculation: "
-                + (after - before) + " milliseconds");
-        logger.debug("Finished Aromaticity Detection");
         BitSet bitSet = new BitSet(fingerprintLength);
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
