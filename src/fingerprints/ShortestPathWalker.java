@@ -1,6 +1,6 @@
 /* $Revision$ $Author$ $Date$
  *
- * Copyright (C) 2011-2012       Syed Asad Rahman <asad@ebi.ac.uk>
+ * Copyright (C) 2012       Syed Asad Rahman <asad@ebi.ac.uk>
  *           
  *
  * Contact: cdk-devel@lists.sourceforge.net
@@ -27,14 +27,12 @@ package fingerprints;
 
 import java.util.*;
 import org.openscience.cdk.CDKConstants;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IPseudoAtom;
-import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
@@ -53,7 +51,7 @@ class ShortestPathWalker {
     private final Set<String> cleanPath;
     private final List<String> pseudoAtoms;
     private int pseduoAtomCounter;
-    private final Set<StringBuffer> allPaths;
+    private final Set<StringBuilder> allPaths;
 
     /**
      *
@@ -61,14 +59,12 @@ class ShortestPathWalker {
      * @throws CloneNotSupportedException
      * @throws CDKException
      */
-    public ShortestPathWalker(IAtomContainer atomContainer) throws CloneNotSupportedException, CDKException {
+    public ShortestPathWalker(IAtomContainer atomContainer) {
         this.cleanPath = new HashSet<String>();
-        this.atomContainer = (IAtomContainer) atomContainer.clone();
-        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.atomContainer);
-        CDKHueckelAromaticityDetector.detectAromaticity(this.atomContainer);
+        this.atomContainer = atomContainer;
         this.pseudoAtoms = new ArrayList<String>();
         this.pseduoAtomCounter = 0;
-        this.allPaths = new HashSet<StringBuffer>();
+        this.allPaths = new HashSet<StringBuilder>();
         findPaths();
     }
 
@@ -90,7 +86,8 @@ class ShortestPathWalker {
         pseudoAtoms.clear();
         traverseShortestPaths();
 
-        for (StringBuffer s : allPaths) {
+        for (Iterator<StringBuilder> it = allPaths.iterator(); it.hasNext();) {
+            StringBuilder s = it.next();
             String s1 = s.toString().trim();
             if (s1.equals("")) {
                 continue;
@@ -110,13 +107,13 @@ class ShortestPathWalker {
          */
         Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalisation().canonicalizeAtoms(atomContainer);
         for (IAtom sourceAtom : canonicalizeAtoms) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             setAtom(sourceAtom, sb);
             if (!allPaths.contains(sb)) {
                 allPaths.add(sb);
             }
             for (IAtom sinkAtom : canonicalizeAtoms) {
-                sb = new StringBuffer();
+                sb = new StringBuilder();
                 if (sourceAtom == sinkAtom) {
                     continue;
                 }
@@ -138,7 +135,7 @@ class ShortestPathWalker {
         }
     }
 
-    private void setAtom(IAtom atomCurrent, StringBuffer sb) {
+    private void setAtom(IAtom atomCurrent, StringBuilder sb) {
         if (atomCurrent instanceof IPseudoAtom) {
             if (!pseudoAtoms.contains(atomCurrent.getSymbol())) {
                 pseudoAtoms.add(pseduoAtomCounter, atomCurrent.getSymbol());
