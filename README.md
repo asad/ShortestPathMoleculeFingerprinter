@@ -19,7 +19,7 @@ Nina's example for CDK Hashed Fingerprinter failure.
      
      Here is the output.
 
-Counter            1	Atoms	52	Bonds	194	Elapsed time	1146	Bitset	{17, 87, 213, 228, 249, 306, 453, 503, 623, 753, 797, 831, 841, 858, 1000}
+Counter      1	Atoms	52	Bonds	194	Elapsed time	1146	Bitset	{17, 87, 213, 228, 249, 306, 453, 503, 623, 753, 797, 831, 841, 858, 1000}
 
 Counter	2	Atoms	16	Bonds	72	Elapsed time	31	Bitset	{475, 503, 523, 623, 658, 728, 753, 841, 858, 1000}
 
