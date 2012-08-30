@@ -64,11 +64,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * </P>
  *
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard 
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
  *
  */
 @TestClass("org.openscience.cdk.fingerprint.ShortestPathFingerprinter")
@@ -166,7 +162,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         }
         return uniquePaths;
     }
-    
+
     private void addUniquePath(IAtomContainer container, BitSet bitSet) {
         Integer[] hashes = findPaths(container);
         for (Integer hash : hashes) {
@@ -224,7 +220,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         List<String> l = new ArrayList<String>();
         for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
             IAtom atom = it.next();
-            int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge().intValue();
+            int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge();
             if (charge != 0) {
                 l.add(atom.getSymbol().concat(String.valueOf(charge)));
             }
@@ -240,7 +236,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
          */
         for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
             IAtom atom = it.next();
-            int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity().intValue();
+            int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity();
             if (st != 0) {
                 l.add(atom.getSymbol().concat(String.valueOf(st)));
             }
@@ -281,6 +277,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      */
 
     private int getRandomNumber(Integer hashValue) {
-        return generateMersenneTwisterRandomNumber(fingerprintLength, hashValue.intValue());
+        return generateMersenneTwisterRandomNumber(fingerprintLength, hashValue);
     }
 }
