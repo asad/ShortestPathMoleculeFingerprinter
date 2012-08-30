@@ -29,6 +29,7 @@ import java.io.Serializable;
 import java.util.*;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
+import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.*;
 import org.openscience.cdk.graph.ConnectivityChecker;
@@ -36,6 +37,7 @@ import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
+import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
@@ -52,14 +54,14 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  *   IBitFingerprint fingerprint = fingerprinter.getFingerprint(molecule);
  *   fingerprint.fingerprintLength(); // returns 1024 by default
  *   fingerprint.length(); // returns the highest set bit
- * </pre> <p>
+ * </pre>
  *
- * <p>The FingerPrinter calculates fingerprint based on the Shortest Paths between two atoms. It also takes care of the
- * ring system and charges, if desired.
+ * <P>The FingerPrinter calculates fingerprint based on the Shortest Paths between two atoms. It also takes care of the
+ * ring system, charges etc. </P>
  *
  * <p>The FingerPrinter assumes that hydrogens are explicitly given! Furthermore, if pseudo atoms or atoms with
  * malformed symbols are present, their atomic number is taken as one more than the last element currently supported in {@link PeriodicTable}.
- *
+ * </P>
  *
  *
  * @author Syed Asad Rahman (2012) 
@@ -104,17 +106,26 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
     }
 
     /**
-     * Generates a fingerprint of the default fingerprintLength for the given AtomContainer.
+     * Generates a shortest path based BitSet fingerprint for the given AtomContainer.
      *
-     * @param atomContainer The AtomContainer for which a Fingerprint is generated
-     * @exception CDKException if there is a timeout in ring or aromaticity perception
+     * @param ac The AtomContainer for which a fingerprint is generated
+     * @exception CDKException if there error in aromaticity perception or other CDK functions
      * @return A {@link BitSet} representing the fingerprint
      */
     @Override
     @TestMethod("testgetBitFingerprint_IAtomContainer")
     public IBitFingerprint getBitFingerprint(
-            IAtomContainer atomContainer)
+            IAtomContainer ac)
             throws CDKException {
+
+        IAtomContainer atomContainer = null;
+        try {
+            atomContainer = (IAtomContainer) ac.clone();
+        } catch (CloneNotSupportedException ex) {
+            logger.error("Failed to clone the molecule:", ex);
+        }
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         BitSet bitSet = new BitSet(fingerprintLength);
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
@@ -127,29 +138,23 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         return new BitSetFingerprint(bitSet);
     }
 
-    private void addUniquePath(IAtomContainer container, BitSet bitSet) {
-        try {
-            Integer[] hashes = findPaths(container);
-            for (Integer hash : hashes) {
-                int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
-                bitSet.set(position);
-            }
-        } catch (CloneNotSupportedException ex) {
-            logger.error("Failed to clone the molecule:", ex);
-        } catch (CDKException ex) {
-            logger.error("CDK Exception: ", ex);
-        }
-    }
-
     /**
      * {@inheritDoc}
      *
-     * @param atomContainer
-     * @return
-     * @throws CDKException
+     * @param ac The AtomContainer for which a fingerprint is generated
+     * @return Map of raw fingerprint paths/features
+     * @exception CDKException if there error in aromaticity perception or other CDK functions
      */
     @Override
-    public Map<String, Integer> getRawFingerprint(IAtomContainer atomContainer) throws CDKException {
+    public Map<String, Integer> getRawFingerprint(IAtomContainer ac) throws CDKException {
+        IAtomContainer atomContainer = null;
+        try {
+            atomContainer = (IAtomContainer) ac.clone();
+        } catch (CloneNotSupportedException ex) {
+            logger.error("Failed to clone the molecule:", ex);
+        }
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
@@ -161,19 +166,21 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         }
         return uniquePaths;
     }
+    
+    private void addUniquePath(IAtomContainer container, BitSet bitSet) {
+        Integer[] hashes = findPaths(container);
+        for (Integer hash : hashes) {
+            int position = getRandomNumber(hash);
+            bitSet.set(position);
+        }
+    }
 
     private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
         Integer[] hashes;
-        try {
-            hashes = findPaths(atomContainer);
-            for (Integer hash : hashes) {
-                int position = (int) generateMersenneTwisterRandomNumber(fingerprintLength, hash.intValue());
-                uniquePaths.put(new Integer(position).toString(), hash);
-            }
-        } catch (CloneNotSupportedException ex) {
-            logger.error("Failed to clone the molecule:", ex);
-        } catch (CDKException ex) {
-            logger.error("CDK Exception: ", ex);
+        hashes = findPaths(atomContainer);
+        for (Integer hash : hashes) {
+            int position = getRandomNumber(hash);
+            uniquePaths.put(new Integer(position).toString(), hash);
         }
     }
 
@@ -185,10 +192,8 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      *
      * @param container The molecule to search
      * @return A map of path strings, keyed on themselves
-     * @throws CloneNotSupportedException
-     * @throws CDKException
      */
-    protected Integer[] findPaths(IAtomContainer container) throws CloneNotSupportedException, CDKException {
+    private Integer[] findPaths(IAtomContainer container) {
 
         ShortestPathWalker walker = new ShortestPathWalker(container);
         // convert paths to hashes
@@ -270,5 +275,12 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
     @Override
     public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
         throw new UnsupportedOperationException("Not supported yet.");
+    }
+    /*
+     * Returns a random number for a given object
+     */
+
+    private int getRandomNumber(Integer hashValue) {
+        return (int) generateMersenneTwisterRandomNumber(fingerprintLength, hashValue.intValue());
     }
 }
