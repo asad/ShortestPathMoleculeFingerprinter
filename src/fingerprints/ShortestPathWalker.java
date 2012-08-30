@@ -64,8 +64,15 @@ class ShortestPathWalker {
     public ShortestPathWalker(IAtomContainer atomContainer) throws CloneNotSupportedException, CDKException {
         this.cleanPath = new HashSet<String>();
         this.atomContainer = (IAtomContainer) atomContainer.clone();
-        AtomContainerManipulator.percieveAtomTypesAndConfigureUnsetProperties(this.atomContainer);
+        logger.debug("Entering Fingerprinter");
+        logger.debug("Starting Aromaticity Detection");
+        long before = System.currentTimeMillis();
+        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(this.atomContainer);
         CDKHueckelAromaticityDetector.detectAromaticity(this.atomContainer);
+        long after = System.currentTimeMillis();
+        logger.debug("time for aromaticity calculation: "
+                + (after - before) + " milliseconds");
+        logger.debug("Finished Aromaticity Detection");
         this.pseudoAtoms = new ArrayList<String>();
         this.pseduoAtomCounter = 0;
         this.allPaths = new HashSet<StringBuffer>();
