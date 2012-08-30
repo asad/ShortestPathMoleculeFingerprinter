@@ -252,13 +252,13 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
 
         if (container.getSingleElectronCount() > 0) {
             StringBuilder radicalInformation = new StringBuilder();
-            radicalInformation.append("RAD: ".concat(String.valueOf(container.getSingleElectronCount())));
+            radicalInformation.append("RAD: ").append(String.valueOf(container.getSingleElectronCount()));
             paths.add(patternIndex, radicalInformation.toString().hashCode());
             patternIndex++;
         }
         if (container.getLonePairCount() > 0) {
             StringBuilder lpInformation = new StringBuilder();
-            lpInformation.append("LP: ".concat(String.valueOf(container.getLonePairCount())));
+            lpInformation.append("LP: ").append(String.valueOf(container.getLonePairCount()));
             paths.add(patternIndex, lpInformation.toString().hashCode());
             patternIndex++;
         }
