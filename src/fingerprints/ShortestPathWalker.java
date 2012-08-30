@@ -186,7 +186,7 @@ class ShortestPathWalker {
     }
 
     /**
-     * Returns true if the bond binds two atoms, and both atoms are SP2.
+     * Returns true if the bond binds two atoms, and both atoms are SP2 in a ring system.
      */
     private boolean isSP2Bond(IBond bond) {
         return bond.getFlag(CDKConstants.ISAROMATIC);
