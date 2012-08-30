@@ -180,7 +180,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         hashes = findPaths(atomContainer);
         for (Integer hash : hashes) {
             int position = getRandomNumber(hash);
-            uniquePaths.put(new Integer(position).toString(), hash);
+            uniquePaths.put(String.valueOf(position), hash);
         }
     }
 
@@ -262,7 +262,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
             paths.add(patternIndex, lpInformation.toString().hashCode());
             patternIndex++;
         }
-
         return paths.toArray(new Integer[paths.size()]);
     }
 
@@ -276,7 +275,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
     public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
+
     /*
      * Returns a random number for a given object
      */
