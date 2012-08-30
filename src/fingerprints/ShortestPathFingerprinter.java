@@ -37,7 +37,6 @@ import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
-import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
@@ -46,18 +45,24 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * are set according to a the occurrence of a particular structural feature (See for example the Daylight inc. theory
  * manual for more information). Fingerprints allow for a fast screening step to exclude candidates for a substructure
  * search in a database. They are also a means for determining the similarity of chemical structures.
- *
- * A fingerprint is generated for an AtomContainer with this code:
+
  * <pre>
+ * 
+ * A fingerprint is generated for an AtomContainer with this code:
+ * It is recommended to use atomtyped container before generating the fingerprints.
+ * 
+ * For example: AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
+ *
  *   AtomContainer molecule = new AtomContainer();
+ *   AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
  *   IFingerprinter fingerprinter = new ShortestPathFingerprinter();
  *   IBitFingerprint fingerprint = fingerprinter.getFingerprint(molecule);
  *   fingerprint.fingerprintLength(); // returns 1024 by default
  *   fingerprint.length(); // returns the highest set bit
  * </pre>
  *
- * <P>The FingerPrinter calculates fingerprint based on the Shortest Paths between two atoms. It also takes care of the
- * ring system, charges etc. </P>
+ * <P>The FingerPrinter calculates fingerprint based on the Shortest Paths between two atoms. It also takes into account
+ * ring system, charges etc while generating a fingerprint. </P>
  *
  * <p>The FingerPrinter assumes that hydrogens are explicitly given! Furthermore, if pseudo atoms or atoms with
  * malformed symbols are present, their atomic number is taken as one more than the last element currently supported in {@link PeriodicTable}.
@@ -124,7 +129,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         } catch (CloneNotSupportedException ex) {
             logger.error("Failed to clone the molecule:", ex);
         }
-        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
         CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         BitSet bitSet = new BitSet(fingerprintLength);
         if (!ConnectivityChecker.isConnected(atomContainer)) {
@@ -153,7 +157,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         } catch (CloneNotSupportedException ex) {
             logger.error("Failed to clone the molecule:", ex);
         }
-        AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
         CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
         if (!ConnectivityChecker.isConnected(atomContainer)) {
