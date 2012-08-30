@@ -31,7 +31,10 @@ import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.fingerprint.*;
+import org.openscience.cdk.fingerprint.BitSetFingerprint;
+import org.openscience.cdk.fingerprint.IBitFingerprint;
+import org.openscience.cdk.fingerprint.ICountFingerprint;
+import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.ringsearch.SSSRFinder;
@@ -45,12 +48,12 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * are set according to a the occurrence of a particular structural feature (See for example the Daylight inc. theory
  * manual for more information). Fingerprints allow for a fast screening step to exclude candidates for a substructure
  * search in a database. They are also a means for determining the similarity of chemical structures.
-
+ *
  * <pre>
- * 
+ *
  * A fingerprint is generated for an AtomContainer with this code:
  * It is recommended to use atomtyped container before generating the fingerprints.
- * 
+ *
  * For example: AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(atomContainer);
  *
  *   AtomContainer molecule = new AtomContainer();
@@ -76,7 +79,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * @cdk.githash
  *
  */
-@TestClass("org.openscience.cdk.fingerprint.ShortestPathFingerprinter")
+@TestClass("org.openscience.cdk.fingerprint.ShortestPathFingerprinterTest")
 public class ShortestPathFingerprinter extends RandomNumber implements IFingerprinter, Serializable {
 
     /**
