@@ -60,9 +60,9 @@ public class SPFingerprinterCDKTest {
         IAtomContainer mol2 = MoleculeFactory.makePyrrole();
         ShortestPathFingerprinter fingerprinter = new ShortestPathFingerprinter();
         IBitFingerprint bs1 = fingerprinter.getBitFingerprint(mol1);
-        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 22, bs1.cardinality());
+        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 35, bs1.cardinality());
         IBitFingerprint bs2 = fingerprinter.getBitFingerprint(mol2);
-        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 11, bs2.cardinality());
+        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 13, bs2.cardinality());
     }
 
     @Test
@@ -124,7 +124,7 @@ public class SPFingerprinterCDKTest {
         Assert.assertNotNull(fingerprinter);
         IAtomContainer mol = MoleculeFactory.makeIndole();
         BitSet bs = fingerprinter.getBitFingerprint(mol).asBitSet();
-        Assert.assertEquals(1024, bs.length()); // highest set bit
+        Assert.assertEquals(1009, bs.length()); // highest set bit
         Assert.assertEquals(1024, bs.size()); // actual bit set size
     }
 
