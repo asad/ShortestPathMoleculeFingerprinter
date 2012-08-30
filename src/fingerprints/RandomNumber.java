@@ -37,7 +37,8 @@ import org.apache.commons.math3.random.RandomGenerator;
  * @cdk.module standard 
  * @cdk.githash
  */
-public class RandomNumber implements Serializable{
+public class RandomNumber implements Serializable {
+
     private static final long serialVersionUID = 23345464573453571L;
 
     /**
@@ -47,19 +48,8 @@ public class RandomNumber implements Serializable{
      * @param hashCode
      * @return
      */
-    public static long generateMersenneTwisterRandomNumber(int maximum, long hashCode) {
+    public static int generateMersenneTwisterRandomNumber(int maximum, long hashCode) {
         RandomGenerator rg = new RandomAdaptor(new MersenneTwister(hashCode));
-        return rg.nextInt(maximum);
-    }
-
-    /**
-     * Mersenne Twister Random Number
-     *
-     * @param maximum
-     * @return
-     */
-    public static long generateMersenneTwisterRandomNumber(int maximum) {
-        RandomGenerator rg = new RandomAdaptor(new MersenneTwister());
         return rg.nextInt(maximum);
     }
 }
