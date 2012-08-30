@@ -1,4 +1,6 @@
-/* Copyright (C) 1997-2007,2011  Egon Willighagen <egonw@users.sf.net>
+/* 
+ * Copyright (C) 1997-2007, 2011  Egon Willighagen <egonw@users.sf.net>
+ * Copyright (C) 2012   Syed Asad Rahman <asad@ebi.ac.uk>
  * 
  * Contact: cdk-devel@lists.sourceforge.net
  * 
@@ -46,6 +48,7 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 
 /**
+ * @author Syed Asad Rahman (2012) 
  * @cdk.module test-standard
  */
 public class ShortestPathFingerprinterTest {
@@ -435,8 +438,8 @@ public class ShortestPathFingerprinterTest {
         System.err.println(bi.toString());
         bi = bi.add(BigInteger.valueOf((long) Math.pow(2, 0)));
         System.err.println(bi.toString());
-        ShortestPathFingerprinter fpt = new ShortestPathFingerprinter();
-        fpt.standAlone = true;
+//        ShortestPathFingerprinter fpt = new ShortestPathFingerprinter();
+//        fpt.standAlone = true;
         //fpt.testFingerprinter();
         //fpt.testFingerprinterArguments();
         //fpt.testBug706786();
