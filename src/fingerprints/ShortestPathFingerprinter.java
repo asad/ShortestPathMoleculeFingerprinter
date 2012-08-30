@@ -27,10 +27,8 @@ package fingerprints;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.logging.Level;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.*;
 import org.openscience.cdk.graph.ConnectivityChecker;
@@ -38,7 +36,6 @@ import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
-import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
@@ -63,8 +60,8 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * <p>The FingerPrinter assumes that hydrogens are explicitly given! Furthermore, if pseudo atoms or atoms with
  * malformed symbols are present, their atomic number is taken as one more than the last element currently supported in {@link PeriodicTable}.
  *
- * 
- * 
+ *
+ *
  * @author Syed Asad Rahman (2012) 
  * @cdk.keyword fingerprint 
  * @cdk.keyword similarity 
@@ -138,9 +135,9 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
                 bitSet.set(position);
             }
         } catch (CloneNotSupportedException ex) {
-            logger.error(Level.SEVERE, null, ex);
+            logger.error("Failed to clone the molecule:", ex);
         } catch (CDKException ex) {
-            logger.error(Level.SEVERE, null, ex);
+            logger.error("CDK Exception: ", ex);
         }
     }
 
@@ -174,9 +171,9 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
                 uniquePaths.put(new Integer(position).toString(), hash);
             }
         } catch (CloneNotSupportedException ex) {
-            logger.error(Level.SEVERE, null, ex);
+            logger.error("Failed to clone the molecule:", ex);
         } catch (CDKException ex) {
-            logger.error(Level.SEVERE, null, ex);
+            logger.error("CDK Exception: ", ex);
         }
     }
 
