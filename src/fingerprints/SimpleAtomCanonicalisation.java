@@ -30,9 +30,14 @@ import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObject;
 
-
 /**
- *
+ * <P>
+ * This code returns a sorted set of atoms for a container 
+ * according to its symbol and hybridization states. 
+ * This will aid in finding a deterministic path rather 
+ * than Stochastic one.
+ * </P>
+ * 
  * @author Syed Asad Rahman (2012) 
  * @cdk.keyword fingerprint 
  * @cdk.keyword similarity 
@@ -40,16 +45,6 @@ import org.openscience.cdk.interfaces.IChemObject;
  * @cdk.githash
  */
 public class SimpleAtomCanonicalisation {
-
-    /**
-     * @param atomSet the atomSet to set
-     * @return canonicalized atoms
-     */
-    public Collection<IAtom> canonicalizeAtoms(Collection<IAtom> atomSet) {
-        List<IAtom> canonicalizedVertexList = new LinkedList<IAtom>(atomSet);
-        Collections.sort(canonicalizedVertexList, new AtomComparator());
-        return Collections.synchronizedCollection(canonicalizedVertexList);
-    }
 
     /**
      * @param container the container
@@ -65,9 +60,10 @@ public class SimpleAtomCanonicalisation {
             i++;
         }
         Collections.sort(canonicalizedVertexList, new AtomComparator());
-        return Collections.synchronizedCollection(canonicalizedVertexList);
+        return canonicalizedVertexList;
     }
 }
+
 class AtomComparator implements Comparator<IAtom> {
 
     @Override
