@@ -64,7 +64,11 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * </P>
  *
  *
- * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
+ * @author Syed Asad Rahman (2012) 
+ * @cdk.keyword fingerprint 
+ * @cdk.keyword similarity 
+ * @cdk.module standard 
+ * @cdk.githash
  *
  */
 @TestClass("org.openscience.cdk.fingerprint.ShortestPathFingerprinter")
