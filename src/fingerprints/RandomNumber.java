@@ -31,7 +31,11 @@ import org.apache.commons.math3.random.RandomAdaptor;
 import org.apache.commons.math3.random.RandomGenerator;
 
 /**
- * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
+ * @author Syed Asad Rahman (2012) 
+ * @cdk.keyword fingerprint 
+ * @cdk.keyword similarity 
+ * @cdk.module standard 
+ * @cdk.githash
  */
 public class RandomNumber implements Serializable{
     private static final long serialVersionUID = 23345464573453571L;
