@@ -1,6 +1,6 @@
 /* $Revision$ $Author$ $Date$
  *
- * Copyright (C) 2011-2012       Syed Asad Rahman <asad@ebi.ac.uk>
+ * Copyright (C) 2012   Syed Asad Rahman <asad@ebi.ac.uk>
  *
  *
  * Contact: cdk-devel@lists.sourceforge.net
@@ -281,6 +281,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      */
 
     private int getRandomNumber(Integer hashValue) {
-        return (int) generateMersenneTwisterRandomNumber(fingerprintLength, hashValue.intValue());
+        return generateMersenneTwisterRandomNumber(fingerprintLength, hashValue.intValue());
     }
 }
