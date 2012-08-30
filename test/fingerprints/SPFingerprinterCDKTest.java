@@ -44,11 +44,11 @@ import org.openscience.cdk.tools.LoggingToolFactory;
 /**
  * @cdk.module test-standard
  */
-public class FingerprinterTest {
+public class SPFingerprinterCDKTest {
 
     boolean standAlone = false;
     private static ILoggingTool logger =
-            LoggingToolFactory.createLoggingTool(FingerprinterTest.class);
+            LoggingToolFactory.createLoggingTool(SPFingerprinterCDKTest.class);
 
     public IFingerprinter getBitFingerprinter() {
         return new ShortestPathFingerprinter();
@@ -327,7 +327,7 @@ public class FingerprinterTest {
         System.err.println(bi.toString());
         bi = bi.add(BigInteger.valueOf((long) Math.pow(2, 0)));
         System.err.println(bi.toString());
-        FingerprinterTest fpt = new FingerprinterTest();
+        SPFingerprinterCDKTest fpt = new SPFingerprinterCDKTest();
         fpt.standAlone = true;
         //fpt.testFingerprinter();
         //fpt.testFingerprinterArguments();
