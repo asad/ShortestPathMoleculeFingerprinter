@@ -276,10 +276,10 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
     public ICountFingerprint getCountFingerprint(IAtomContainer iac) throws CDKException {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+    
     /*
      * Returns a random number for a given object
      */
-
     private int getRandomNumber(Integer hashValue) {
         return generateMersenneTwisterRandomNumber(fingerprintLength, hashValue);
     }
