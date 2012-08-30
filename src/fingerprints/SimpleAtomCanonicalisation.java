@@ -31,13 +31,9 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemObject;
 
 /**
- * <P>
- * This code returns a sorted set of atoms for a container 
- * according to its symbol and hybridization states. 
- * This will aid in finding a deterministic path rather 
- * than Stochastic one.
- * </P>
- * 
+ * <P> This code returns a sorted set of atoms for a container according to its symbol and hybridization states. This
+ * will aid in finding a deterministic path rather than Stochastic one. </P>
+ *
  * @author Syed Asad Rahman (2012) 
  * @cdk.keyword fingerprint 
  * @cdk.keyword similarity 
@@ -71,7 +67,7 @@ class AtomComparator implements Comparator<IAtom> {
         if (!(o1 instanceof IChemObject) || !(o2 instanceof IChemObject)) {
             throw new ClassCastException();
         }
-        if (o1.getSymbol().compareToIgnoreCase(o2.getSymbol()) == 0) {
+        if (o1.getSymbol().equalsIgnoreCase(o2.getSymbol())) {
             if (o1.getHybridization() != null && o2.getHybridization() != null) {
                 return o1.getHybridization().compareTo(o2.getHybridization());
             }
