@@ -38,8 +38,8 @@ public class SPFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        Assert.assertEquals(125,fingerprint1.cardinality());
-        Assert.assertEquals(1024,fingerprint1.size());
+        Assert.assertEquals(16, fingerprint1.cardinality());
+        Assert.assertEquals(1024, fingerprint1.size());
 //        System.out.println("fp " + fingerprint1.cardinality() + ":" + fingerprint1.toString());
     }
 
@@ -116,7 +116,7 @@ public class SPFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        Assert.assertEquals(10,fingerprint1.cardinality());
+        Assert.assertEquals(8, fingerprint1.cardinality());
 //        System.out.println("fp " + fingerprint1.toString());
     }
 
@@ -130,7 +130,7 @@ public class SPFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        Assert.assertEquals(8,fingerprint1.cardinality());
+        Assert.assertEquals(6, fingerprint1.cardinality());
 //        System.out.println("fp " + fingerprint1.toString());
     }
 
@@ -145,7 +145,7 @@ public class SPFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        Assert.assertEquals(16,fingerprint1.cardinality());
+        Assert.assertEquals(14, fingerprint1.cardinality());
 //        System.out.println("fp " + fingerprint1.toString());
     }
 }
