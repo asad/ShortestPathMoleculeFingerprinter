@@ -29,18 +29,16 @@ import java.io.Serializable;
 import java.util.*;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.exception.NoSuchAtomException;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.*;
-import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
-import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
@@ -82,6 +80,10 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
 @TestClass("org.openscience.cdk.fingerprint.ShortestPathFingerprinterTest")
 public class ShortestPathFingerprinter extends RandomNumber implements IFingerprinter, Serializable {
 
+    /**
+     * Make FP generic with ring etc
+     */
+    public static boolean makeFingerprintGeneric = true;
     /**
      * The default length of created fingerprints.
      */
@@ -132,7 +134,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         } catch (CloneNotSupportedException ex) {
             logger.error("Failed to clone the molecule:", ex);
         }
-        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         BitSet bitSet = new BitSet(fingerprintLength);
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
@@ -160,7 +161,6 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         } catch (CloneNotSupportedException ex) {
             logger.error("Failed to clone the molecule:", ex);
         }
-        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
@@ -173,7 +173,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         return uniquePaths;
     }
 
-    private void addUniquePath(IAtomContainer container, BitSet bitSet) {
+    private void addUniquePath(IAtomContainer container, BitSet bitSet) throws NoSuchAtomException {
         Integer[] hashes = findPaths(container);
         for (Integer hash : hashes) {
             int position = getRandomNumber(hash);
@@ -181,7 +181,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         }
     }
 
-    private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
+    private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) throws NoSuchAtomException {
         Integer[] hashes;
         hashes = findPaths(atomContainer);
         for (Integer hash : hashes) {
@@ -199,7 +199,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      * @param container The molecule to search
      * @return A map of path strings, keyed on themselves
      */
-    private Integer[] findPaths(IAtomContainer container) {
+    private Integer[] findPaths(IAtomContainer container) throws NoSuchAtomException {
 
         ShortestPathWalker walker = new ShortestPathWalker(container);
         // convert paths to hashes
@@ -211,62 +211,49 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
+        /*
+         * This part of the module is skippd for generic fingerprint
+         */
+        if (!makeFingerprintGeneric) {
 
-        /*
-         * Add ring information
-         */
-        SSSRFinder finder = new SSSRFinder(container);
-        IRingSet sssr = finder.findEssentialRings();
-        RingSetManipulator.sort(sssr);
-        for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
-            IAtomContainer ring = it.next();
-            int toHashCode = String.valueOf(ring.getAtomCount()).hashCode();
-            paths.add(patternIndex, toHashCode);
-            patternIndex++;
-        }
-        /*
-         * Check for the charges
-         */
-        List<String> l = new ArrayList<String>();
-        for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
-            IAtom atom = it.next();
-            int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge();
-            if (charge != 0) {
-                l.add(atom.getSymbol().concat(String.valueOf(charge)));
+            /*
+             * Check for the charges
+             */
+            List<String> l = new ArrayList<String>();
+            for (IAtom atom : container.atoms()) {
+                int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge();
+                if (charge != 0) {
+                    l.add(atom.getSymbol().concat(String.valueOf(charge)));
+                }
             }
-        }
-        Collections.sort(l);
-        int toHashCode = l.hashCode();
-        paths.add(patternIndex, toHashCode);
-        patternIndex++;
+            Collections.sort(l);
+            int toHashCode = l.hashCode();
+            paths.add(patternIndex++, toHashCode);
 
-        l = new ArrayList<String>();
-        /*
-         * atom stereo parity
-         */
-        for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
-            IAtom atom = it.next();
-            int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity();
-            if (st != 0) {
-                l.add(atom.getSymbol().concat(String.valueOf(st)));
+            l = new ArrayList<String>();
+            /*
+             * atom stereo parity
+             */
+            for (IAtom atom : container.atoms()) {
+                int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity();
+                if (st != 0) {
+                    l.add(atom.getSymbol().concat(String.valueOf(st)));
+                }
             }
-        }
-        Collections.sort(l);
-        toHashCode = l.hashCode();
-        paths.add(patternIndex, toHashCode);
-        patternIndex++;
+            Collections.sort(l);
+            toHashCode = l.hashCode();
+            paths.add(patternIndex++, toHashCode);
 
-        if (container.getSingleElectronCount() > 0) {
-            StringBuilder radicalInformation = new StringBuilder();
-            radicalInformation.append("RAD: ").append(String.valueOf(container.getSingleElectronCount()));
-            paths.add(patternIndex, radicalInformation.toString().hashCode());
-            patternIndex++;
-        }
-        if (container.getLonePairCount() > 0) {
-            StringBuilder lpInformation = new StringBuilder();
-            lpInformation.append("LP: ").append(String.valueOf(container.getLonePairCount()));
-            paths.add(patternIndex, lpInformation.toString().hashCode());
-            patternIndex++;
+            if (container.getSingleElectronCount() > 0) {
+                StringBuilder radicalInformation = new StringBuilder();
+                radicalInformation.append("RAD: ").append(String.valueOf(container.getSingleElectronCount()));
+                paths.add(patternIndex++, radicalInformation.toString().hashCode());
+            }
+            if (container.getLonePairCount() > 0) {
+                StringBuilder lpInformation = new StringBuilder();
+                lpInformation.append("LP: ").append(String.valueOf(container.getLonePairCount()));
+                paths.add(patternIndex++, lpInformation.toString().hashCode());
+            }
         }
         return paths.toArray(new Integer[paths.size()]);
     }
