@@ -67,9 +67,9 @@ public class ShortestPathFingerprinterTest {
         IAtomContainer mol2 = MoleculeFactory.makePyrrole();
         ShortestPathFingerprinter fingerprinter = new ShortestPathFingerprinter();
         IBitFingerprint bs1 = fingerprinter.getBitFingerprint(mol1);
-        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 24, bs1.cardinality());
+        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 32, bs1.cardinality());
         IBitFingerprint bs2 = fingerprinter.getBitFingerprint(mol2);
-        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 11, bs2.cardinality());
+        Assert.assertEquals("Seems the fingerprint code has changed. This will cause a number of other tests to fail too!", 12, bs2.cardinality());
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        junit.framework.Assert.assertEquals(16, fingerprint1.cardinality());
+        junit.framework.Assert.assertEquals(57, fingerprint1.cardinality());
         junit.framework.Assert.assertEquals(1024, fingerprint1.size());
     }
 
@@ -157,7 +157,7 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        junit.framework.Assert.assertEquals(8, fingerprint1.cardinality());
+        junit.framework.Assert.assertEquals(7, fingerprint1.cardinality());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        junit.framework.Assert.assertEquals(6, fingerprint1.cardinality());
+        junit.framework.Assert.assertEquals(5, fingerprint1.cardinality());
     }
 
     @Test
@@ -182,7 +182,7 @@ public class ShortestPathFingerprinterTest {
         ShortestPathFingerprinter fingerprint = new ShortestPathFingerprinter(1024);
         BitSet fingerprint1;
         fingerprint1 = fingerprint.getBitFingerprint(molecule).asBitSet();
-        junit.framework.Assert.assertEquals(14, fingerprint1.cardinality());
+        junit.framework.Assert.assertEquals(13, fingerprint1.cardinality());
     }
 
     @Test
@@ -239,7 +239,7 @@ public class ShortestPathFingerprinterTest {
         Assert.assertNotNull(fingerprinter);
         IAtomContainer mol = MoleculeFactory.makeIndole();
         BitSet bs = fingerprinter.getBitFingerprint(mol).asBitSet();
-        Assert.assertEquals(980, bs.length()); // highest set bit
+        Assert.assertEquals(1020, bs.length()); // highest set bit
         Assert.assertEquals(1024, bs.size()); // actual bit set size
     }
 
