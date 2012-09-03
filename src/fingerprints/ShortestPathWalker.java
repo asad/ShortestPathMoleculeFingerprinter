@@ -193,12 +193,15 @@ final class ShortestPathWalker {
         SimpleGraph moleculeGraph = PathFinder.getMoleculeGraph(atomContainer);
 
         for (IAtom sourceAtom : canonicalizeAtoms) {
+            StringBuilder sb = new StringBuilder();
+            setAtom(sourceAtom, sb);
+            allPaths.add(sb.toString().trim());
             if (basicRings.contains(sourceAtom)) {
                 continue;
             }
             final List<LinkedList<Edge>> shortestPaths = PathFinder.findPaths(moleculeGraph, sourceAtom);
             for (LinkedList<Edge> shortestPath : shortestPaths) {
-                StringBuilder sb = new StringBuilder();
+                sb = new StringBuilder();
                 if (shortestPath == null || shortestPath.isEmpty() || shortestPath.size() > 10) {
                     continue;
                 }
