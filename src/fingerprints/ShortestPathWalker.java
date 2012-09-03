@@ -25,9 +25,9 @@
  */
 package fingerprints;
 
+import fingerprints.model.AtomGraph;
+import fingerprints.model.AtomVertex;
 import java.util.*;
-import org._3pq.jgrapht.Edge;
-import org._3pq.jgrapht.graph.SimpleGraph;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.exception.NoSuchAtomException;
 import org.openscience.cdk.graph.SpanningTree;
@@ -51,7 +51,7 @@ final class ShortestPathWalker {
     private final List<String> pseudoAtoms;
     private int pseduoAtomCounter;
     private final Set<String> allPaths;
-    private final IAtomContainer basicRings;
+    private final IRingSet basicRings;
     private final Map<IAtom, Map<IAtom, IBond>> cache;
 
     /**
@@ -62,12 +62,12 @@ final class ShortestPathWalker {
      */
     public ShortestPathWalker(IAtomContainer atomContainer) throws NoSuchAtomException {
         SpanningTree spanningTree = new SpanningTree(atomContainer);
-        this.basicRings = spanningTree.getCyclicFragmentsContainer();
-        this.cleanPath = new TreeSet<String>();
+        this.basicRings = spanningTree.getBasicRings();
+        this.cleanPath = new HashSet<String>();
         this.atomContainer = atomContainer;
         this.pseudoAtoms = new ArrayList<String>();
         this.pseduoAtomCounter = 0;
-        this.allPaths = new TreeSet<String>();
+        this.allPaths = new HashSet<String>();
         this.cache = new HashMap<IAtom, Map<IAtom, IBond>>();
         findPaths();
     }
@@ -95,7 +95,8 @@ final class ShortestPathWalker {
                 continue;
             }
             if (!cleanPath.contains(s1)) {
-                cleanPath.add(s1.trim());
+//                System.out.println(s1);
+                cleanPath.add(s1);
             }
         }
     }
@@ -189,27 +190,26 @@ final class ShortestPathWalker {
         /*
          * Canonicalisation of atoms for reporting unique pathsToDestination with consistency
          */
-        Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalisation().canonicalizeAtoms(atomContainer);
-        SimpleGraph moleculeGraph = PathFinder.getMoleculeGraph(atomContainer);
+        AtomGraph moleculeGraph = new AtomGraph(atomContainer, basicRings, false);
 
-        for (IAtom sourceAtom : canonicalizeAtoms) {
-            StringBuilder sb = new StringBuilder();
-            setAtom(sourceAtom, sb);
-            allPaths.add(sb.toString().trim());
+        for (IAtom sourceAtom : atomContainer.atoms()) {
             if (basicRings.contains(sourceAtom)) {
                 continue;
             }
-            final List<LinkedList<Edge>> shortestPaths = PathFinder.findPaths(moleculeGraph, sourceAtom);
-            for (LinkedList<Edge> shortestPath : shortestPaths) {
+            StringBuilder sb = new StringBuilder();
+            setAtom(sourceAtom, sb);
+            allPaths.add(sb.toString().trim());
+            PathFinder pathFinder = new PathFinder(moleculeGraph, moleculeGraph.getVertexLookupMap().get(sourceAtom), true);
+            Collection<Stack<AtomVertex>> shortestPaths = pathFinder.getSinkKShorestPath();
+
+            for (Stack<AtomVertex> shortestPath : shortestPaths) {
                 sb = new StringBuilder();
-                if (shortestPath == null || shortestPath.isEmpty() || shortestPath.size() > 10) {
+                if (shortestPath == null || shortestPath.isEmpty() || shortestPath.size() > 8) {
                     continue;
                 }
-
-                for (Edge e : shortestPath) {
-                    final IAtom atomCurrent = (IAtom) e.getSource();
-                    final IAtom atomNext = (IAtom) e.getTarget();
-
+                IAtom atomCurrent = shortestPath.pop().getAtom();
+                while (!shortestPath.empty()) {
+                    final IAtom atomNext = shortestPath.pop().getAtom();
                     Map<IAtom, IBond> m = cache.get(atomCurrent);
                     final IBond[] b = {m != null ? m.get(atomNext) : null};
                     if (b[0] == null) {
@@ -227,11 +227,10 @@ final class ShortestPathWalker {
                     setAtom(atomCurrent, sb);
                     sb.append(getBondSymbol(b[0]));
                     setAtom(atomNext, sb);
+                    atomCurrent = atomNext;
+
                 }
-                String pathString = sb.toString().trim();
-                char[] toCharArray = pathString.toCharArray();
-                Arrays.sort(toCharArray);
-                allPaths.add(String.copyValueOf(toCharArray));
+                allPaths.add(sb.toString().trim());
             }
         }
     }
@@ -244,40 +243,45 @@ final class ShortestPathWalker {
         /*
          * Canonicalisation of atoms for reporting unique pathsToDestination with consistency
          */
-        Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalisation().canonicalizeAtoms(basicRings);
-        SimpleGraph moleculeGraph = PathFinder.getMoleculeGraph(basicRings);
 
-        for (IAtom sourceAtom : canonicalizeAtoms) {
-            final List<LinkedList<Edge>> shortestPaths = PathFinder.findPaths(moleculeGraph, sourceAtom);
-            for (LinkedList<Edge> shortestPath : shortestPaths) {
+        for (IAtomContainer ac : basicRings.atomContainers()) {
+            AtomGraph moleculeGraph = new AtomGraph(ac, false);
+            for (IAtom sourceAtom : ac.atoms()) {
                 StringBuilder sb = new StringBuilder();
-                if (shortestPath == null || shortestPath.isEmpty()) {
-                    continue;
-                }
-
-                for (Edge e : shortestPath) {
-                    final IAtom atomCurrent = (IAtom) e.getSource();
-                    final IAtom atomNext = (IAtom) e.getTarget();
-                    Map<IAtom, IBond> m = cache.get(atomCurrent);
-                    final IBond[] b = {m != null ? m.get(atomNext) : null};
-                    if (b[0] == null) {
-                        b[0] = basicRings.getBond(atomCurrent, atomNext);
-                        cache.put(atomCurrent,
-                                new HashMap<IAtom, IBond>() {
-
-                                    {
-                                        put(atomNext, b[0]);
-                                    }
-                                    private static final long serialVersionUID = 0xb3a7a32449fL;
-                                });
+                setAtom(sourceAtom, sb);
+                allPaths.add(sb.toString().trim());
+                PathFinder pathFinder = new PathFinder(moleculeGraph, moleculeGraph.getVertexLookupMap().get(sourceAtom), true);
+                Collection<Stack<AtomVertex>> shortestPaths = pathFinder.getSinkKShorestPath();
+                for (Stack<AtomVertex> shortestPath : shortestPaths) {
+                    sb = new StringBuilder();
+                    if (shortestPath == null || shortestPath.isEmpty()) {
+                        continue;
                     }
+                    IAtom atomCurrent = shortestPath.pop().getAtom();
 
-                    setAtom(atomCurrent, sb);
-                    sb.append(getBondSymbol(b[0]));
-                    setAtom(atomNext, sb);
+                    while (!shortestPath.empty()) {
+                        final IAtom atomNext = shortestPath.pop().getAtom();
+                        Map<IAtom, IBond> m = cache.get(atomCurrent);
+                        final IBond[] b = {m != null ? m.get(atomNext) : null};
+                        if (b[0] == null) {
+                            b[0] = ac.getBond(atomCurrent, atomNext);
+                            cache.put(atomCurrent,
+                                    new HashMap<IAtom, IBond>() {
+
+                                        {
+                                            put(atomNext, b[0]);
+                                        }
+                                        private static final long serialVersionUID = 0xb3a7a32449fL;
+                                    });
+                        }
+
+                        setAtom(atomCurrent, sb);
+                        sb.append(getBondSymbol(b[0]));
+                        setAtom(atomNext, sb);
+                        atomCurrent = atomNext;
+                    }
+                    allPaths.add(sb.toString().trim());
                 }
-                String pathString = sb.toString().trim();
-                allPaths.add(pathString);
             }
         }
     }

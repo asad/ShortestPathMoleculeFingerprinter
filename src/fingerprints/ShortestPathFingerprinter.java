@@ -71,9 +71,9 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * </P>
  *
  *
- * @author Syed Asad Rahman (2012)
+ * @author Syed Asad Rahman (2012) 
  * @cdk.keyword fingerprint 
- * @cdk.keyword similarity
+ * @cdk.keyword similarity 
  * @cdk.module standard 
  * @cdk.githash
  *
@@ -234,7 +234,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         int patternIndex = 0;
 
         for (String s : walker.getPaths()) {
-            int toHashCode = s.hashCode();
+            int toHashCode = hashcode(s);
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
@@ -301,5 +301,24 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      */
     private int getRandomNumber(Integer hashValue) {
         return generateMersenneTwisterRandomNumber(fingerprintLength, hashValue);
+    }
+
+    private int hashcode(String s) {
+        StringBuilder sb = new StringBuilder(s);
+        //  byte[] holds the data.
+        int hash = 0;
+        int len = sb.length();
+
+        for (int i = 0; i < len; i++) {
+            // rotate left and xor 
+            // (very fast in assembler, a bit clumsy in Java)
+            hash <<= 1;
+
+            if (hash < 0) {
+                hash |= 1;
+            }
+            hash ^= sb.charAt(i);
+        }
+        return hash;
     }
 }

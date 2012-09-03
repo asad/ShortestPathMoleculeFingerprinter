@@ -25,20 +25,21 @@
  */
 package fingerprints;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import org._3pq.jgrapht.Edge;
-import org._3pq.jgrapht.Graph;
-import org._3pq.jgrapht.graph.SimpleGraph;
-import org._3pq.jgrapht.traverse.BreadthFirstIterator;
+import fingerprints.model.AtomGraph;
+import fingerprints.model.AtomVertex;
+import java.util.*;
+import org.openscience.cdk.Atom;
+import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.Bond;
+import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.tools.ILoggingTool;
+import org.openscience.cdk.tools.LoggingToolFactory;
 
 /**
- * @author Syed Asad Rahman (2012)
+ * @author Syed Asad Rahman (2012) 
  * @cdk.keyword fingerprint 
  * @cdk.keyword similarity 
  * @cdk.module standard 
@@ -46,97 +47,143 @@ import org.openscience.cdk.interfaces.IBond;
  *
  */
 public class PathFinder {
-
-    /**
-     * Creates a undirected, unweighted molecule graph for use with jgrapht. Bond orders are not respected.
-     *
-     * @param molecule the specified molecule
-     * @return a graph representing the molecule
-     */
-    static public SimpleGraph getMoleculeGraph(IAtomContainer molecule) {
-        SimpleGraph graph = new SimpleGraph();
-        for (IAtom atom : molecule.atoms()) {
-            graph.addVertex(atom);
-        }
-
-        for (IBond bond : molecule.bonds()) {
-            graph.addEdge(bond.getAtom(0), bond.getAtom(1));
-            graph.addEdge(bond.getAtom(1), bond.getAtom(0));
-        }
-        return graph;
+    
+    private static ILoggingTool logger =
+            LoggingToolFactory.createLoggingTool(PathFinder.class);
+    private final AtomGraph graph;
+    private final AtomVertex startNode;
+    private final boolean heuristic;
+    private int depth;
+    private boolean allPath;
+    
+    public PathFinder(AtomGraph graph, AtomVertex startNode) {
+        this.graph = graph;
+        this.startNode = startNode;
+        this.heuristic = false;
+    }
+    
+    PathFinder(AtomGraph moleculeGraph, AtomVertex startNode, boolean heuristic) {
+        this.graph = moleculeGraph;
+        this.startNode = startNode;
+        this.heuristic = heuristic;
     }
 
-    /**
-     * Finds BFS Shortest Path between Source and Sink atoms
-     *
-     * @param graph
-     * @param startVertex
-     * @param endVertex
-     * @return
+    /*
+     * recursive call to build the path
      */
-    public static LinkedList<Edge> findPathBetween(Graph graph, Object startVertex, Object endVertex) {
-        BFSIterator iter =
-                new BFSIterator(graph, startVertex);
-
-        while (iter.hasNext()) {
-            Object vertex = iter.next();
-            if (vertex.equals(endVertex)) {
-                return createPath(iter, endVertex);
-            }
+    protected Stack<AtomVertex> constructPath(fingerprints.model.Path node) {
+        Stack<AtomVertex> path = new Stack<AtomVertex>();
+        int localDepth = 1;
+        while (node.getParent() != null) {
+            path.push(node.getNode());
+            node = node.getParent();
+            localDepth++;
         }
-
-        return null;
-    }
-
-    /**
-     * Finds BFS Shortest Path between Source and all sink atoms
-     *
-     * @param graph
-     * @param startVertex
-     * @return
-     */
-    public static List<LinkedList<Edge>> findPaths(Graph graph, Object startVertex) {
-        List<LinkedList<Edge>> paths = new ArrayList<LinkedList<Edge>>();
-        BFSIterator iter =
-                new BFSIterator(graph, startVertex);
-
-        while (iter.hasNext()) {
-            Object sinkVertex = iter.next();
-            paths.add(createPath(iter, sinkVertex));
-        }
-
-        return paths;
-    }
-
-    private static LinkedList<Edge> createPath(BFSIterator iter, Object endVertex) {
-        LinkedList<Edge> path = new LinkedList<Edge>();
-
-        while (true) {
-            Edge edge = iter.getSpanningTreeEdge(endVertex);
-            if (edge == null) {
-                break;
-            }
-            path.add(edge);
-            endVertex = edge.oppositeVertex(endVertex);
-        }
-        Collections.reverse(path);
+        path.push(startNode);
         return path;
     }
 
-    private static class BFSIterator extends BreadthFirstIterator {
-
-        public BFSIterator(Graph g, Object startVertex) {
-            super(g, startVertex);
+    /**
+     *
+     * @return
+     */
+    public Collection<Stack<AtomVertex>> getSinkKShorestPath() {
+        
+        this.depth = 0;
+        this.allPath = false;
+        
+        List<Stack<AtomVertex>> paths = new ArrayList<Stack<AtomVertex>>();
+        // list of visited nodes
+        LinkedList<fingerprints.model.Path> closedList = new LinkedList<fingerprints.model.Path>();
+        // list of nodes to visit (sorted)
+        LinkedList<fingerprints.model.Path> openList = new LinkedList<fingerprints.model.Path>();
+        openList.add(new fingerprints.model.Path(startNode));
+        while (!openList.isEmpty()) {
+            fingerprints.model.Path currentPath = openList.removeFirst();
+            logger.debug("Path found");
+            //Has covered all shortest path at the given depth
+            if (!allPath) {
+                // path found!
+                Stack<AtomVertex> constructedPath = constructPath(currentPath);
+                if (!constructedPath.isEmpty()) {
+                    paths.add(constructedPath);
+                }
+                logger.debug("New Path found " + constructedPath);
+                logger.debug("Depth " + this.depth);
+            }
+            
+            closedList.add(currentPath);
+            // add neighbors to the open list
+            Iterator<AtomVertex> i = graph.getAdjacentVertices(currentPath.getNode()).keySet().iterator();
+            while (i.hasNext()) {
+                AtomVertex neighborNode = i.next();
+                fingerprints.model.Path neighborPath = new fingerprints.model.Path(neighborNode);
+                if (heuristic && !closedList.contains(neighborPath) && !openList.contains(neighborPath)) {
+                    neighborPath.setPathParent(currentPath);
+                    openList.add(neighborPath);
+                } else if (!heuristic && !closedList.contains(neighborPath)) {
+                    neighborPath.setPathParent(currentPath);
+                    openList.add(neighborPath);
+                }
+            }
         }
-
-        @Override
-        protected void encounterVertex(Object vertex, Edge edge) {
-            super.encounterVertex(vertex, edge);
-            putSeenData(vertex, edge);
+        logger.debug("\nDepth: " + this.depth);
+        /*
+         * No paths found
+         */
+        return Collections.unmodifiableList(paths);
+    }
+    
+    public static void main(String[] args) throws InvalidSmilesException {
+        IAtomContainer atomContainer = new AtomContainer();
+        IAtom atom1 = new Atom("Cl");
+        IAtom atom2 = new Atom("C");
+        IAtom atom3 = new Atom("O");
+        IAtom atom4 = new Atom("N");
+        IAtom atom5 = new Atom("N");
+        IAtom atom6 = new Atom("S");
+        IAtom atom7 = new Atom("Br");
+        
+        IBond bond1 = new Bond(atom1, atom2, IBond.Order.SINGLE);
+        IBond bond2 = new Bond(atom2, atom3, IBond.Order.SINGLE);
+        IBond bond3 = new Bond(atom2, atom4, IBond.Order.SINGLE);
+        IBond bond4 = new Bond(atom2, atom5, IBond.Order.SINGLE);
+        IBond bond5 = new Bond(atom3, atom6, IBond.Order.SINGLE);
+        IBond bond6 = new Bond(atom1, atom3, IBond.Order.SINGLE);
+        IBond bond7 = new Bond(atom5, atom7, IBond.Order.SINGLE);
+        IBond bond8 = new Bond(atom4, atom7, IBond.Order.SINGLE);
+        
+        atomContainer.addAtom(atom1);
+        atomContainer.addAtom(atom2);
+        atomContainer.addAtom(atom3);
+        atomContainer.addAtom(atom4);
+        atomContainer.addAtom(atom5);
+        atomContainer.addAtom(atom6);
+        atomContainer.addAtom(atom7);
+        
+        
+        atomContainer.addBond(bond1);
+        atomContainer.addBond(bond2);
+        atomContainer.addBond(bond3);
+        atomContainer.addBond(bond4);
+        atomContainer.addBond(bond5);
+        atomContainer.addBond(bond6);
+        atomContainer.addBond(bond7);
+        atomContainer.addBond(bond8);
+        
+        AtomGraph g = new AtomGraph(atomContainer, true);
+        PathFinder bfsksP = new PathFinder(g, g.getVertexLookupMap().get(atom1));
+        Collection<Stack<AtomVertex>> kShortestPaths = bfsksP.getSinkKShorestPath();
+        
+        
+        System.out.println("BFS S");
+        for (Iterator<Stack<AtomVertex>> it = kShortestPaths.iterator(); it.hasNext();) {
+            Stack<AtomVertex> paths = it.next();
+            while (!paths.isEmpty()) {
+                System.out.print(paths.pop() + ", ");
+            }
+            System.out.println();
         }
-
-        public Edge getSpanningTreeEdge(Object vertex) {
-            return (Edge) getSeenData(vertex);
-        }
+        System.out.println();
     }
 }
