@@ -27,6 +27,7 @@ package fingerprints;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.exception.CDKException;
@@ -70,9 +71,9 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * </P>
  *
  *
- * @author Syed Asad Rahman (2012) 
+ * @author Syed Asad Rahman (2012)
  * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
+ * @cdk.keyword similarity
  * @cdk.module standard 
  * @cdk.githash
  *
@@ -120,13 +121,14 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      *
      * @param ac The AtomContainer for which a fingerprint is generated
      * @exception CDKException if there error in aromaticity perception or other CDK functions
+     * @throws NoSuchAtomException
      * @return A {@link BitSet} representing the fingerprint
      */
     @Override
     @TestMethod("testgetBitFingerprint_IAtomContainer")
     public IBitFingerprint getBitFingerprint(
             IAtomContainer ac)
-            throws CDKException {
+            throws CDKException, NoSuchAtomException {
 
         IAtomContainer atomContainer = null;
         try {
@@ -138,10 +140,22 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
             for (IAtomContainer container : partitionedMolecules.atomContainers()) {
-                addUniquePath(container, bitSet);
+                try {
+                    addUniquePath(container, bitSet);
+                } catch (InterruptedException ex) {
+                    logger.error("Threads: ", ex);
+                } catch (ExecutionException ex) {
+                    logger.error("Threads failed", ex);
+                }
             }
         } else {
-            addUniquePath(atomContainer, bitSet);
+            try {
+                addUniquePath(atomContainer, bitSet);
+            } catch (InterruptedException ex) {
+                logger.error("Threads: ", ex);
+            } catch (ExecutionException ex) {
+                logger.error("Threads failed", ex);
+            }
         }
         return new BitSetFingerprint(bitSet);
     }
@@ -152,9 +166,10 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      * @param ac The AtomContainer for which a fingerprint is generated
      * @return Map of raw fingerprint paths/features
      * @exception CDKException if there error in aromaticity perception or other CDK functions
+     * @throws NoSuchAtomException
      */
     @Override
-    public Map<String, Integer> getRawFingerprint(IAtomContainer ac) throws CDKException {
+    public Map<String, Integer> getRawFingerprint(IAtomContainer ac) throws CDKException, NoSuchAtomException {
         IAtomContainer atomContainer = null;
         try {
             atomContainer = (IAtomContainer) ac.clone();
@@ -165,15 +180,27 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
             for (IAtomContainer container : partitionedMolecules.atomContainers()) {
-                addUniquePath(container, uniquePaths);
+                try {
+                    addUniquePath(container, uniquePaths);
+                } catch (InterruptedException ex) {
+                    logger.error("Threads: ", ex);
+                } catch (ExecutionException ex) {
+                    logger.error("Threads failed", ex);
+                }
             }
         } else {
-            addUniquePath(atomContainer, uniquePaths);
+            try {
+                addUniquePath(atomContainer, uniquePaths);
+            } catch (InterruptedException ex) {
+                logger.error("Threads: ", ex);
+            } catch (ExecutionException ex) {
+                logger.error("Threads failed", ex);
+            }
         }
         return uniquePaths;
     }
 
-    private void addUniquePath(IAtomContainer container, BitSet bitSet) throws NoSuchAtomException {
+    private void addUniquePath(IAtomContainer container, BitSet bitSet) throws NoSuchAtomException, InterruptedException, ExecutionException {
         Integer[] hashes = findPaths(container);
         for (Integer hash : hashes) {
             int position = getRandomNumber(hash);
@@ -181,7 +208,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         }
     }
 
-    private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) throws NoSuchAtomException {
+    private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) throws NoSuchAtomException, InterruptedException, ExecutionException {
         Integer[] hashes;
         hashes = findPaths(atomContainer);
         for (Integer hash : hashes) {
@@ -199,7 +226,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      * @param container The molecule to search
      * @return A map of path strings, keyed on themselves
      */
-    private Integer[] findPaths(IAtomContainer container) throws NoSuchAtomException {
+    private Integer[] findPaths(IAtomContainer container) throws NoSuchAtomException, InterruptedException, ExecutionException {
 
         ShortestPathWalker walker = new ShortestPathWalker(container);
         // convert paths to hashes
