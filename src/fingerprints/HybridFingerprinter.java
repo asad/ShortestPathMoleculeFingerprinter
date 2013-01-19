@@ -27,14 +27,12 @@ import java.util.*;
 import org.openscience.cdk.CDKConstants;
 
 import org.openscience.cdk.annotations.TestMethod;
-import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.fingerprint.*;
 import org.openscience.cdk.graph.PathTools;
 import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.interfaces.IAtomType.Hybridization;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
-import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
