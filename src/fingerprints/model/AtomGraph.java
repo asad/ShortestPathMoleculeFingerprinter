@@ -106,7 +106,7 @@ public class AtomGraph extends ExampleGraphContainers implements Serializable {
          * Canonicalized vertexs as SP may return only one path out of k-sp Hence this path has to be same for similar
          * molecules
          */
-        Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalisation().canonicalizeAtoms(container);
+        Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalizer().canonicalizeAtoms(container);
         for (Iterator<IAtom> it = canonicalizeAtoms.iterator(); it.hasNext();) {
             IAtom atom = it.next();
             if (skipVertices.contains(atom)) {

@@ -25,13 +25,15 @@
  */
 package fingerprints;
 
-import fingerprints.model.AtomGraph;
-import fingerprints.model.AtomVertex;
+import fingerprints.model.SimpleAtomCanonicalizer;
 import java.util.*;
+import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.exception.NoSuchAtomException;
-import org.openscience.cdk.graph.SpanningTree;
-import org.openscience.cdk.interfaces.*;
+import org.openscience.cdk.graph.PathTools;
+import org.openscience.cdk.interfaces.IAtom;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IBond;
+import org.openscience.cdk.interfaces.IPseudoAtom;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
@@ -39,20 +41,18 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * @author Syed Asad Rahman (2012) 
  * @cdk.keyword fingerprint 
  * @cdk.keyword similarity 
- * @cdk.module standard 
+ * @cdk.module fingerprint
  * @cdk.githash
  *
  */
-final class ShortestPathWalker {
+public class ShortestPathWalker {
 
     private static final long serialVersionUID = 0x3b728f46;
     private final IAtomContainer atomContainer;
     private final Set<String> cleanPath;
     private final List<String> pseudoAtoms;
     private int pseduoAtomCounter;
-    private final Set<String> allPaths;
-    private final IRingSet basicRings;
-    private final Map<IAtom, Map<IAtom, IBond>> cache;
+    private final Set<StringBuilder> allPaths;
 
     /**
      *
@@ -60,15 +60,12 @@ final class ShortestPathWalker {
      * @throws CloneNotSupportedException
      * @throws CDKException
      */
-    public ShortestPathWalker(IAtomContainer atomContainer) throws NoSuchAtomException {
-        SpanningTree spanningTree = new SpanningTree(atomContainer);
-        this.basicRings = spanningTree.getBasicRings();
+    public ShortestPathWalker(IAtomContainer atomContainer) {
         this.cleanPath = new HashSet<String>();
         this.atomContainer = atomContainer;
         this.pseudoAtoms = new ArrayList<String>();
         this.pseduoAtomCounter = 0;
-        this.allPaths = new HashSet<String>();
-        this.cache = new HashMap<IAtom, Map<IAtom, IBond>>();
+        this.allPaths = new HashSet<StringBuilder>();
         findPaths();
     }
 
@@ -88,15 +85,48 @@ final class ShortestPathWalker {
 
     private void findPaths() {
         pseudoAtoms.clear();
-        getAtomPaths();
-        getRingAtomPaths();
-        for (String s1 : allPaths) {
-            if (s1.equals("")) {
-                continue;
+        traverseShortestPaths();
+
+        for (StringBuilder s : allPaths) {
+            String clean = s.toString().trim();
+            if (!clean.isEmpty())
+                cleanPath.add(clean);
+        }
+    }
+
+    /*
+     * This module generates shortest path between two atoms
+     */
+    private void traverseShortestPaths() {
+        /*
+         * Canonicalisation of atoms for reporting unique paths with consistency
+         */
+        Collection<IAtom> canonicalizeAtoms = new SimpleAtomCanonicalizer().canonicalizeAtoms(atomContainer);
+        for (IAtom sourceAtom : canonicalizeAtoms) {
+            StringBuilder sb = new StringBuilder();
+            setAtom(sourceAtom, sb);
+            if (!allPaths.contains(sb)) {
+                allPaths.add(sb);
             }
-            if (!cleanPath.contains(s1)) {
-//                System.out.println(s1);
-                cleanPath.add(s1);
+            for (IAtom sinkAtom : canonicalizeAtoms) {
+                sb = new StringBuilder();
+                if (sourceAtom == sinkAtom) {
+                    continue;
+                }
+                List<IAtom> shortestPath = PathTools.getShortestPath(atomContainer, sourceAtom, sinkAtom);
+                if (shortestPath == null || shortestPath.isEmpty() || shortestPath.size() < 2) {
+                    continue;
+                }
+                //System.out.println("Path length " + shortestPath.size());
+                IAtom atomCurrent = shortestPath.get(0);
+                for (int i = 1; i < shortestPath.size(); i++) {
+                    IAtom atomNext = shortestPath.get(i);
+                    setAtom(atomCurrent, sb);
+                    sb.append(getBondSymbol(atomContainer.getBond(atomCurrent, atomNext)));
+                    atomCurrent = atomNext;
+                }
+                setAtom(atomCurrent, sb);
+                allPaths.add(sb);
             }
         }
     }
@@ -152,25 +182,7 @@ final class ShortestPathWalker {
      * Returns true if the bond binds two atoms, and both atoms are SP2 in a ring system.
      */
     private boolean isSP2Bond(IBond bond) {
-        if (bond.getAtomCount() == 2
-                && bond.getAtom(0).getHybridization() == IAtomType.Hybridization.SP2
-                && bond.getAtom(1).getHybridization() == IAtomType.Hybridization.SP2
-                && isRingBond(bond)) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Returns true if the bond binds two atoms, and both atoms are SP2 in a ring system.
-     */
-    private boolean isRingBond(IBond bond) {
-        if (bond.getAtomCount() == 2
-                && basicRings.contains(bond.getAtom(0))
-                && basicRings.contains(bond.getAtom(1))) {
-            return true;
-        }
-        return false;
+        return bond.getFlag(CDKConstants.ISAROMATIC);
     }
 
     @Override
@@ -180,109 +192,5 @@ final class ShortestPathWalker {
             sb.append(path).append("->");
         }
         return sb.toString();
-    }
-    /*
-     * This module generates shortest path between atoms using BFS
-     */
-
-    private void getAtomPaths() {
-
-        /*
-         * Canonicalisation of atoms for reporting unique pathsToDestination with consistency
-         */
-        AtomGraph moleculeGraph = new AtomGraph(atomContainer, basicRings, false);
-
-        for (IAtom sourceAtom : atomContainer.atoms()) {
-            if (basicRings.contains(sourceAtom)) {
-                continue;
-            }
-            StringBuilder sb = new StringBuilder();
-            setAtom(sourceAtom, sb);
-            allPaths.add(sb.toString().trim());
-            PathFinder pathFinder = new PathFinder(moleculeGraph, moleculeGraph.getVertexLookupMap().get(sourceAtom), true);
-            Collection<Stack<AtomVertex>> shortestPaths = pathFinder.getSinkKShorestPath();
-
-            for (Stack<AtomVertex> shortestPath : shortestPaths) {
-                sb = new StringBuilder();
-                if (shortestPath == null || shortestPath.isEmpty() || shortestPath.size() > 8) {
-                    continue;
-                }
-                IAtom atomCurrent = shortestPath.pop().getAtom();
-                while (!shortestPath.empty()) {
-                    final IAtom atomNext = shortestPath.pop().getAtom();
-                    Map<IAtom, IBond> m = cache.get(atomCurrent);
-                    final IBond[] b = {m != null ? m.get(atomNext) : null};
-                    if (b[0] == null) {
-                        b[0] = atomContainer.getBond(atomCurrent, atomNext);
-                        cache.put(atomCurrent,
-                                new HashMap<IAtom, IBond>() {
-
-                                    {
-                                        put(atomNext, b[0]);
-                                    }
-                                    private static final long serialVersionUID = 0xb3a7a32449fL;
-                                });
-                    }
-
-                    setAtom(atomCurrent, sb);
-                    sb.append(getBondSymbol(b[0]));
-                    setAtom(atomNext, sb);
-                    atomCurrent = atomNext;
-
-                }
-                allPaths.add(sb.toString().trim());
-            }
-        }
-    }
-
-    /*
-     * This module generates shortest path between atoms using BFS
-     */
-    private void getRingAtomPaths() {
-
-        /*
-         * Canonicalisation of atoms for reporting unique pathsToDestination with consistency
-         */
-
-        for (IAtomContainer ac : basicRings.atomContainers()) {
-            AtomGraph moleculeGraph = new AtomGraph(ac, false);
-            for (IAtom sourceAtom : ac.atoms()) {
-                StringBuilder sb = new StringBuilder();
-                setAtom(sourceAtom, sb);
-                allPaths.add(sb.toString().trim());
-                PathFinder pathFinder = new PathFinder(moleculeGraph, moleculeGraph.getVertexLookupMap().get(sourceAtom), true);
-                Collection<Stack<AtomVertex>> shortestPaths = pathFinder.getSinkKShorestPath();
-                for (Stack<AtomVertex> shortestPath : shortestPaths) {
-                    sb = new StringBuilder();
-                    if (shortestPath == null || shortestPath.isEmpty()) {
-                        continue;
-                    }
-                    IAtom atomCurrent = shortestPath.pop().getAtom();
-
-                    while (!shortestPath.empty()) {
-                        final IAtom atomNext = shortestPath.pop().getAtom();
-                        Map<IAtom, IBond> m = cache.get(atomCurrent);
-                        final IBond[] b = {m != null ? m.get(atomNext) : null};
-                        if (b[0] == null) {
-                            b[0] = ac.getBond(atomCurrent, atomNext);
-                            cache.put(atomCurrent,
-                                    new HashMap<IAtom, IBond>() {
-
-                                        {
-                                            put(atomNext, b[0]);
-                                        }
-                                        private static final long serialVersionUID = 0xb3a7a32449fL;
-                                    });
-                        }
-
-                        setAtom(atomCurrent, sb);
-                        sb.append(getBondSymbol(b[0]));
-                        setAtom(atomNext, sb);
-                        atomCurrent = atomNext;
-                    }
-                    allPaths.add(sb.toString().trim());
-                }
-            }
-        }
     }
 }

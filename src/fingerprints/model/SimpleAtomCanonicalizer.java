@@ -26,36 +26,37 @@
 package fingerprints.model;
 
 import java.util.*;
+
+import org.openscience.cdk.annotations.TestMethod;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 /**
- * <P> This code returns a sorted set of atoms for a container according to its symbol and hybridization states. This
- * will aid in finding a deterministic path rather than Stochastic one. </P>
+ * <P> This code returns a sorted set of atoms for a container according to its
+ * symbol and hybridization states. This will aid in finding a deterministic
+ * path rather than Stochastic one. </P>
  *
  * @author Syed Asad Rahman (2012) 
  * @cdk.keyword fingerprint 
  * @cdk.keyword similarity 
- * @cdk.module standard 
+ * @cdk.module fingerprint
  * @cdk.githash
- *
+ * 
  */
-public class SimpleAtomCanonicalisation {
+public class SimpleAtomCanonicalizer {
 
-    /**
-     * @param container the container
-     * @return canonicalized atoms
-     */
-    public Collection<IAtom> canonicalizeAtoms(IAtomContainer container) {
-
-        List<IAtom> canonicalizedVertexList = new LinkedList<IAtom>();
-        int i = 0;
-        for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
-            IAtom atom = it.next();
-            canonicalizedVertexList.add(i, atom);
-            i++;
+	/**
+	 * @param container the container
+	 * @return canonicalized atoms
+	 */
+    @TestMethod("testCanonicalizeAtoms")
+	public Collection<IAtom> canonicalizeAtoms(IAtomContainer container) {
+		
+		List<IAtom> canonicalizedVertexList = new ArrayList<IAtom>();
+        for (IAtom atom : container.atoms()) {
+            canonicalizedVertexList.add(atom);
         }
-        Collections.sort(canonicalizedVertexList, new SimpleAtomComparator());
-        return canonicalizedVertexList;
-    }
+		Collections.sort(canonicalizedVertexList, new SimpleAtomComparator());
+		return canonicalizedVertexList;
+	}
 }

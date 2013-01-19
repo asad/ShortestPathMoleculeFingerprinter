@@ -27,19 +27,20 @@ package fingerprints;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import org.openscience.cdk.annotations.TestClass;
 import org.openscience.cdk.annotations.TestMethod;
+import org.openscience.cdk.aromaticity.CDKHueckelAromaticityDetector;
 import org.openscience.cdk.exception.CDKException;
-import org.openscience.cdk.exception.NoSuchAtomException;
 import org.openscience.cdk.fingerprint.BitSetFingerprint;
 import org.openscience.cdk.fingerprint.IBitFingerprint;
 import org.openscience.cdk.fingerprint.ICountFingerprint;
 import org.openscience.cdk.fingerprint.IFingerprinter;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.*;
+import org.openscience.cdk.ringsearch.SSSRFinder;
 import org.openscience.cdk.tools.ILoggingTool;
 import org.openscience.cdk.tools.LoggingToolFactory;
+import org.openscience.cdk.tools.manipulator.RingSetManipulator;
 import org.openscience.cdk.tools.periodictable.PeriodicTable;
 
 /**
@@ -71,20 +72,12 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * </P>
  *
  *
- * @author Syed Asad Rahman (2012) 
- * @cdk.keyword fingerprint 
- * @cdk.keyword similarity 
- * @cdk.module standard 
- * @cdk.githash
+ * @author Syed Asad Rahman (2012) @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module fingerprint @cdk.githash
  *
  */
 @TestClass("org.openscience.cdk.fingerprint.ShortestPathFingerprinterTest")
 public class ShortestPathFingerprinter extends RandomNumber implements IFingerprinter, Serializable {
 
-    /**
-     * Make FP generic with ring etc
-     */
-    public static boolean makeFingerprintGeneric = true;
     /**
      * The default length of created fingerprints.
      */
@@ -121,41 +114,29 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      *
      * @param ac The AtomContainer for which a fingerprint is generated
      * @exception CDKException if there error in aromaticity perception or other CDK functions
-     * @throws NoSuchAtomException
      * @return A {@link BitSet} representing the fingerprint
      */
     @Override
     @TestMethod("testgetBitFingerprint_IAtomContainer")
     public IBitFingerprint getBitFingerprint(
             IAtomContainer ac)
-            throws CDKException, NoSuchAtomException {
+            throws CDKException {
 
         IAtomContainer atomContainer = null;
         try {
-            atomContainer = (IAtomContainer) ac.clone();
+            atomContainer = ac.clone();
         } catch (CloneNotSupportedException ex) {
             logger.error("Failed to clone the molecule:", ex);
         }
+        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         BitSet bitSet = new BitSet(fingerprintLength);
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
             for (IAtomContainer container : partitionedMolecules.atomContainers()) {
-                try {
-                    addUniquePath(container, bitSet);
-                } catch (InterruptedException ex) {
-                    logger.error("Threads: ", ex);
-                } catch (ExecutionException ex) {
-                    logger.error("Threads failed", ex);
-                }
+                addUniquePath(container, bitSet);
             }
         } else {
-            try {
-                addUniquePath(atomContainer, bitSet);
-            } catch (InterruptedException ex) {
-                logger.error("Threads: ", ex);
-            } catch (ExecutionException ex) {
-                logger.error("Threads failed", ex);
-            }
+            addUniquePath(atomContainer, bitSet);
         }
         return new BitSetFingerprint(bitSet);
     }
@@ -166,41 +147,29 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      * @param ac The AtomContainer for which a fingerprint is generated
      * @return Map of raw fingerprint paths/features
      * @exception CDKException if there error in aromaticity perception or other CDK functions
-     * @throws NoSuchAtomException
      */
     @Override
-    public Map<String, Integer> getRawFingerprint(IAtomContainer ac) throws CDKException, NoSuchAtomException {
+    public Map<String, Integer> getRawFingerprint(IAtomContainer ac) throws CDKException {
         IAtomContainer atomContainer = null;
         try {
-            atomContainer = (IAtomContainer) ac.clone();
+            atomContainer = ac.clone();
         } catch (CloneNotSupportedException ex) {
             logger.error("Failed to clone the molecule:", ex);
         }
+        CDKHueckelAromaticityDetector.detectAromaticity(atomContainer);
         Map<String, Integer> uniquePaths = new TreeMap<String, Integer>();
         if (!ConnectivityChecker.isConnected(atomContainer)) {
             IAtomContainerSet partitionedMolecules = ConnectivityChecker.partitionIntoMolecules(atomContainer);
             for (IAtomContainer container : partitionedMolecules.atomContainers()) {
-                try {
-                    addUniquePath(container, uniquePaths);
-                } catch (InterruptedException ex) {
-                    logger.error("Threads: ", ex);
-                } catch (ExecutionException ex) {
-                    logger.error("Threads failed", ex);
-                }
+                addUniquePath(container, uniquePaths);
             }
         } else {
-            try {
-                addUniquePath(atomContainer, uniquePaths);
-            } catch (InterruptedException ex) {
-                logger.error("Threads: ", ex);
-            } catch (ExecutionException ex) {
-                logger.error("Threads failed", ex);
-            }
+            addUniquePath(atomContainer, uniquePaths);
         }
         return uniquePaths;
     }
 
-    private void addUniquePath(IAtomContainer container, BitSet bitSet) throws NoSuchAtomException, InterruptedException, ExecutionException {
+    private void addUniquePath(IAtomContainer container, BitSet bitSet) {
         Integer[] hashes = findPaths(container);
         for (Integer hash : hashes) {
             int position = getRandomNumber(hash);
@@ -208,7 +177,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         }
     }
 
-    private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) throws NoSuchAtomException, InterruptedException, ExecutionException {
+    private void addUniquePath(IAtomContainer atomContainer, Map<String, Integer> uniquePaths) {
         Integer[] hashes;
         hashes = findPaths(atomContainer);
         for (Integer hash : hashes) {
@@ -226,7 +195,7 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      * @param container The molecule to search
      * @return A map of path strings, keyed on themselves
      */
-    private Integer[] findPaths(IAtomContainer container) throws NoSuchAtomException, InterruptedException, ExecutionException {
+    private Integer[] findPaths(IAtomContainer container) {
 
         ShortestPathWalker walker = new ShortestPathWalker(container);
         // convert paths to hashes
@@ -234,53 +203,66 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
         int patternIndex = 0;
 
         for (String s : walker.getPaths()) {
-            int toHashCode = hashcode(s);
+            int toHashCode = s.hashCode();
+            paths.add(patternIndex, toHashCode);
+            patternIndex++;
+        }
+
+        /*
+         * Add ring information
+         */
+        SSSRFinder finder = new SSSRFinder(container);
+        IRingSet sssr = finder.findEssentialRings();
+        RingSetManipulator.sort(sssr);
+        for (Iterator<IAtomContainer> it = sssr.atomContainers().iterator(); it.hasNext();) {
+            IAtomContainer ring = it.next();
+            int toHashCode = String.valueOf(ring.getAtomCount()).hashCode();
             paths.add(patternIndex, toHashCode);
             patternIndex++;
         }
         /*
-         * This part of the module is skippd for generic fingerprint
+         * Check for the charges
          */
-        if (!makeFingerprintGeneric) {
+        List<String> l = new ArrayList<String>();
+        for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+            IAtom atom = it.next();
+            int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge();
+            if (charge != 0) {
+                l.add(atom.getSymbol().concat(String.valueOf(charge)));
+            }
+        }
+        Collections.sort(l);
+        int toHashCode = l.hashCode();
+        paths.add(patternIndex, toHashCode);
+        patternIndex++;
 
-            /*
-             * Check for the charges
-             */
-            List<String> l = new ArrayList<String>();
-            for (IAtom atom : container.atoms()) {
-                int charge = atom.getFormalCharge() == null ? 0 : atom.getFormalCharge();
-                if (charge != 0) {
-                    l.add(atom.getSymbol().concat(String.valueOf(charge)));
-                }
+        l = new ArrayList<String>();
+        /*
+         * atom stereo parity
+         */
+        for (Iterator<IAtom> it = container.atoms().iterator(); it.hasNext();) {
+            IAtom atom = it.next();
+            int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity();
+            if (st != 0) {
+                l.add(atom.getSymbol().concat(String.valueOf(st)));
             }
-            Collections.sort(l);
-            int toHashCode = l.hashCode();
-            paths.add(patternIndex++, toHashCode);
+        }
+        Collections.sort(l);
+        toHashCode = l.hashCode();
+        paths.add(patternIndex, toHashCode);
+        patternIndex++;
 
-            l = new ArrayList<String>();
-            /*
-             * atom stereo parity
-             */
-            for (IAtom atom : container.atoms()) {
-                int st = atom.getStereoParity() == null ? 0 : atom.getStereoParity();
-                if (st != 0) {
-                    l.add(atom.getSymbol().concat(String.valueOf(st)));
-                }
-            }
-            Collections.sort(l);
-            toHashCode = l.hashCode();
-            paths.add(patternIndex++, toHashCode);
-
-            if (container.getSingleElectronCount() > 0) {
-                StringBuilder radicalInformation = new StringBuilder();
-                radicalInformation.append("RAD: ").append(String.valueOf(container.getSingleElectronCount()));
-                paths.add(patternIndex++, radicalInformation.toString().hashCode());
-            }
-            if (container.getLonePairCount() > 0) {
-                StringBuilder lpInformation = new StringBuilder();
-                lpInformation.append("LP: ").append(String.valueOf(container.getLonePairCount()));
-                paths.add(patternIndex++, lpInformation.toString().hashCode());
-            }
+        if (container.getSingleElectronCount() > 0) {
+            StringBuilder radicalInformation = new StringBuilder();
+            radicalInformation.append("RAD: ").append(String.valueOf(container.getSingleElectronCount()));
+            paths.add(patternIndex, radicalInformation.toString().hashCode());
+            patternIndex++;
+        }
+        if (container.getLonePairCount() > 0) {
+            StringBuilder lpInformation = new StringBuilder();
+            lpInformation.append("LP: ").append(String.valueOf(container.getLonePairCount()));
+            paths.add(patternIndex, lpInformation.toString().hashCode());
+            patternIndex++;
         }
         return paths.toArray(new Integer[paths.size()]);
     }
@@ -301,24 +283,5 @@ public class ShortestPathFingerprinter extends RandomNumber implements IFingerpr
      */
     private int getRandomNumber(Integer hashValue) {
         return generateMersenneTwisterRandomNumber(fingerprintLength, hashValue);
-    }
-
-    private int hashcode(String s) {
-        StringBuilder sb = new StringBuilder(s);
-        //  byte[] holds the data.
-        int hash = 0;
-        int len = sb.length();
-
-        for (int i = 0; i < len; i++) {
-            // rotate left and xor 
-            // (very fast in assembler, a bit clumsy in Java)
-            hash <<= 1;
-
-            if (hash < 0) {
-                hash |= 1;
-            }
-            hash ^= sb.charAt(i);
-        }
-        return hash;
     }
 }
