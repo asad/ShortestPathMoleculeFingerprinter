@@ -1,5 +1,6 @@
 /* Copyright (C) 2002-2007  Christoph Steinbeck <steinbeck@users.sf.net>
  *               2009-2011  Egon Willighagen <egonw@users.sf.net>
+ *               2013       Syed Asad Rahman <S9asad@gmail.com>
  *
  * Contact: cdk-devel@lists.sourceforge.net
  *
@@ -47,7 +48,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * <pre>
  *   Molecule molecule = new Molecule();
  *   IFingerprinter fingerprinter =
- *     new HybridizationFingerprinter();
+ *     new HybridFingerprinter();
  *   BitSet fingerprint = fingerprinter.getFingerprint(molecule);
  *   fingerprint.size(); // returns 1024 by default
  *   fingerprint.length(); // returns the highest set bit
@@ -57,7 +58,7 @@ import org.openscience.cdk.tools.periodictable.PeriodicTable;
  * malformed symbols are present, their atomic number is taken as one more than the last element currently supported in {@link PeriodicTable}.
  *
  * <p>Unlike the {@link Fingerprinter}, this fingerprinter does not take into account aromaticity. Instead, it takes
- * into account SP2
+ * into account SP2 with ring systems
  * {@link Hybridization}.
  *
  * @cdk.keyword fingerprint @cdk.keyword similarity @cdk.module standard @cdk.githash
